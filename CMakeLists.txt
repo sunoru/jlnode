@@ -20,49 +20,20 @@ set(sources
         ${source_path}/NodeJSInstance.cpp)
 set(headers
         ${source_path}/NodeJSInstance.h)
-add_library(jlnode SHARED ${sources} ${headers})
 
-file(READ ${CMAKE_CURRENT_SOURCE_DIR}/node/src/node_version.h NODEJS_VERSION_FILE)
+include_directories(${CMAKE_JS_INC})
 
-string(REGEX MATCH "#define NODE_MODULE_VERSION ([0-9]+)" NODEJS_MODULE_VERSION_DEF ${NODEJS_VERSION_FILE})
-string(REGEX MATCH "([0-9]+)$" NODEJS_MODULE_VERSION ${NODEJS_MODULE_VERSION_DEF})
+add_library(${PROJECT_NAME}
+    SHARED ${sources} ${headers}
+    ${CMAKE_JS_SRC})
 
-set(NODEJS_LIBRARY_NAMES
-        libnode.so.${NODEJS_MODULE_VERSION}
-        libnode.${NODEJS_MODULE_VERSION}.dylib
-        libnode.${NODEJS_MODULE_VERSION}.dll
-        node.lib)
+set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "" SUFFIX ".node")
 
-find_library(NODEJS_LIBRARY
-        NAMES ${NODEJS_LIBRARY_NAMES}
-        PATHS ${CMAKE_CURRENT_SOURCE_DIR}/node/out/Release)
-
-target_link_libraries(jlnode
+target_link_libraries(${PROJECT_NAME}
         JlCxx::cxxwrap_julia
-        ${NODEJS_LIBRARY})
+        ${CMAKE_JS_LIB})
 
-target_include_directories(jlnode
-        PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/node/src
-        ${CMAKE_CURRENT_SOURCE_DIR}/node/deps/v8/include
-        ${CMAKE_CURRENT_SOURCE_DIR}/node/deps/uv/include)
-
-add_executable(test_run
-        ${sources}
-        ${headers}
-        test/test_run.cpp)
-
-target_link_libraries(test_run
-        JlCxx::cxxwrap_julia
-        ${NODEJS_LIBRARY})
-
-target_include_directories(test_run
-        PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/node/src
-        ${CMAKE_CURRENT_SOURCE_DIR}/node/deps/v8/include
-        ${CMAKE_CURRENT_SOURCE_DIR}/node/deps/uv/include)
-
-install(TARGETS jlnode test_run
+install(TARGETS ${PROJECT_NAME}
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib
         RUNTIME DESTINATION lib)

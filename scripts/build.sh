@@ -1,7 +1,7 @@
 #!/bin/sh
 set -ex
 
-cd `dirname $(realpath $0)`/../node
+cd `dirname $(realpath $0)`/..
 mkdir -p cmake-build
 cd cmake-build
 cmake ..

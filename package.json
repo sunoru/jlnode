@@ -1,0 +1,24 @@
+{
+  "name": "jlnode",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "cmake-js build",
+    "install": "cmake-js compile"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sunoru/jlnode.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sunoru/jlnode/issues"
+  },
+  "homepage": "https://github.com/sunoru/jlnode#readme",
+  "dependencies": {
+    "cmake-js": "^6.1.0",
+    "nan": "^2.14.2"
+  }
+}
