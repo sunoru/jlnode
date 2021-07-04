@@ -42,17 +42,16 @@ public:
     std::unique_ptr<node::MultiIsolatePlatform> platform;
     std::shared_ptr<node::ArrayBufferAllocator> allocator;
     v8::Isolate *isolate;
-    std::unique_ptr<Config> config;
+    Config *config;
     v8::Local<v8::Context> context;
-    std::unique_ptr<Environment> environment;
+    Environment *environment;
 
     Instance();
 
     int Initialize();
+    int Dispose();
 
     int Run(std::string scripts);
-
-    ~Instance();
 
 private:
     bool initialized;

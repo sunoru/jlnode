@@ -28,21 +28,13 @@ Environment::Environment(
 Instance::Instance() {
 }
 
-Instance::~Instance() {
-    if (!initialized) {
-        return;
-    }
-    V8::Dispose();
-    V8::ShutdownPlatform();
-}
-
 int Instance::Initialize() {
     char pt[256];
     uv_get_process_title(pt, 256);
     std::vector<std::string> args{std::string(pt)};
     std::vector<std::string> exec_args;
     std::vector<std::string> errors;
-    int exit_code = node::InitializeNodeWithArgs(&args, &exec_args, &errors);
+    auto exit_code = node::InitializeNodeWithArgs(&args, &exec_args, &errors);
     for (const std::string &error : errors)
         fprintf(stderr, "%s: %s\n", args[0].c_str(), error.c_str());
     if (exit_code != 0) {
@@ -51,7 +43,7 @@ int Instance::Initialize() {
     platform = node::MultiIsolatePlatform::Create(1);
     v8::V8::InitializePlatform(platform.get());
     v8::V8::Initialize();
-    int ret = uv_loop_init(&event_loop);
+    auto ret = uv_loop_init(&event_loop);
     if (ret != 0) {
         fprintf(stderr, "%s: Failed to initialize loop: %s\n",
                 pt, uv_err_name(ret));
@@ -65,20 +57,36 @@ int Instance::Initialize() {
         return 1;
     }
 
-    config = std::make_unique<Config>(isolate, &event_loop, platform.get(), allocator.get());
+    config = new Config(isolate, &event_loop, platform.get(), allocator.get());
 
     context = node::NewContext(isolate);
     if (context.IsEmpty()) {
         fprintf(stderr, "%s: Failed to initialize V8 Context\n", pt);
         return 1;
     }
-    environment = std::make_unique<Environment>(*config, context, args, exec_args);
+    environment = new Environment(*config, context, args, exec_args);
     auto load_env_ret = node::LoadEnvironment(
         environment->env.get(),
-        "console.log(Math.random())"
+        "const publicRequire ="
+        "  require('module').createRequire(process.cwd() + '/')\n"
+        "globalThis.require = publicRequire\n"
+        "const addon = publicRequire(`./build/lib/jlnode_addon.node`)\n"
+        "console.log(addon.initialize(123))\n"
     );
     if (load_env_ret.IsEmpty()) {
         return 1;
+    }
+
+    return 0;
+}
+
+int Instance::Run(const std::string scripts) {
+    return 0;
+}
+
+int Instance::Dispose() {
+    if (!initialized) {
+        return 0;
     }
 
     {
@@ -94,8 +102,11 @@ int Instance::Initialize() {
         } while (more);
     }
 
-    exit_code = node::EmitExit(environment->env.get());
+    auto exit_code = node::EmitExit(environment->env.get());
     node::Stop(environment->env.get());
+
+    delete environment;
+    delete config;
     auto platform_finished = false;
     platform->AddIsolateFinishedCallback(isolate, [](void *data) {
         *static_cast<bool *>(data) = true;
@@ -104,13 +115,12 @@ int Instance::Initialize() {
     isolate->Dispose();
     while (!platform_finished)
         uv_run(&event_loop, UV_RUN_ONCE);
-    int err = uv_loop_close(&event_loop);
+    auto err = uv_loop_close(&event_loop);
     assert(err == 0);
 
+    V8::Dispose();
+    V8::ShutdownPlatform();
     return exit_code;
 }
 
-int Instance::Run(const std::string scripts) {
-    return 0;
-}
 }

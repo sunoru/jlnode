@@ -2,5 +2,5 @@
 set -ex
 
 cd `dirname $(realpath $0)`/../node
-./configure --shared
+./configure --shared --without-inspector
 make -j6

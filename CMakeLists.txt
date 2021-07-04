@@ -21,11 +21,8 @@ set(sources
 set(headers
         ${source_path}/instance.h)
 
-include_directories(${CMAKE_JS_INC})
-
 add_library(${PROJECT_NAME}
-    SHARED ${sources} ${headers}
-    ${CMAKE_JS_SRC})
+        SHARED ${sources} ${headers})
 
 file(READ ${CMAKE_CURRENT_SOURCE_DIR}/node/src/node_version.h NODEJS_VERSION_FILE)
 
@@ -42,11 +39,8 @@ find_library(NODEJS_LIBRARY
         NAMES ${NODEJS_LIBRARY_NAMES}
         PATHS ${CMAKE_CURRENT_SOURCE_DIR}/node/out/${CMAKE_BUILD_TYPE})
 
-set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "" SUFFIX ".node")
-
 target_link_libraries(${PROJECT_NAME}
         JlCxx::cxxwrap_julia
-        ${CMAKE_JS_LIB}
         ${NODEJS_LIBRARY})
 
 target_include_directories(${PROJECT_NAME}
@@ -55,7 +49,31 @@ target_include_directories(${PROJECT_NAME}
         ${CMAKE_CURRENT_SOURCE_DIR}/node/deps/v8/include
         ${CMAKE_CURRENT_SOURCE_DIR}/node/deps/uv/include)
 
-install(TARGETS ${PROJECT_NAME}
+
+project(jlnode_addon
+        VERSION 14.17.1
+        LANGUAGES CXX)
+
+set(addon_path "${CMAKE_CURRENT_SOURCE_DIR}/addon")
+set(addon_sources
+        ${addon_path}/addon.cpp
+        ${addon_path}/init.cpp)
+set(addon_headers
+        ${addon_path}/init.h)
+
+add_library(${PROJECT_NAME}
+        SHARED ${addon_sources} ${addon_headers}
+        ${CMAKE_JS_SRC})
+
+set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "" SUFFIX ".node")
+
+target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_JS_INC})
+
+target_link_libraries(${PROJECT_NAME}
+        ${CMAKE_JS_LIB}
+        ${NODEJS_LIBRARY})
+
+install(TARGETS jlnode jlnode_addon
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib
         RUNTIME DESTINATION lib)
