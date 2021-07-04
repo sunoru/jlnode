@@ -17,9 +17,9 @@ message(STATUS "Found JlCxx at ${JlCxx_location}")
 set(source_path "${CMAKE_CURRENT_SOURCE_DIR}/src")
 set(sources
         ${source_path}/module.cpp
-        ${source_path}/NodeJSInstance.cpp)
+        ${source_path}/instance.cpp)
 set(headers
-        ${source_path}/NodeJSInstance.h)
+        ${source_path}/instance.h)
 
 include_directories(${CMAKE_JS_INC})
 
@@ -27,11 +27,33 @@ add_library(${PROJECT_NAME}
     SHARED ${sources} ${headers}
     ${CMAKE_JS_SRC})
 
+file(READ ${CMAKE_CURRENT_SOURCE_DIR}/node/src/node_version.h NODEJS_VERSION_FILE)
+
+string(REGEX MATCH "#define NODE_MODULE_VERSION ([0-9]+)" NODEJS_MODULE_VERSION_DEF ${NODEJS_VERSION_FILE})
+string(REGEX MATCH "([0-9]+)$" NODEJS_MODULE_VERSION ${NODEJS_MODULE_VERSION_DEF})
+
+set(NODEJS_LIBRARY_NAMES
+        libnode.so.${NODEJS_MODULE_VERSION}
+        libnode.${NODEJS_MODULE_VERSION}.dylib
+        libnode.${NODEJS_MODULE_VERSION}.dll
+        node.lib)
+
+find_library(NODEJS_LIBRARY
+        NAMES ${NODEJS_LIBRARY_NAMES}
+        PATHS ${CMAKE_CURRENT_SOURCE_DIR}/node/out/${CMAKE_BUILD_TYPE})
+
 set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "" SUFFIX ".node")
 
 target_link_libraries(${PROJECT_NAME}
         JlCxx::cxxwrap_julia
-        ${CMAKE_JS_LIB})
+        ${CMAKE_JS_LIB}
+        ${NODEJS_LIBRARY})
+
+target_include_directories(${PROJECT_NAME}
+        PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/node/src
+        ${CMAKE_CURRENT_SOURCE_DIR}/node/deps/v8/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/node/deps/uv/include)
 
 install(TARGETS ${PROJECT_NAME}
         LIBRARY DESTINATION lib

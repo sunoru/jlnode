@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "cmake-js build",
+    "build": "cmake-js build --CDJulia_EXECUTABLE=`which julia-1.6`",
     "install": "cmake-js compile"
   },
   "repository": {

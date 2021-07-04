@@ -1,10 +1,10 @@
 #include "jlcxx/jlcxx.hpp"
 
-#include "NodeJSInstance.h"
+#include "instance.h"
 
 JLCXX_MODULE define_julia_module(jlcxx::Module &mod) {
     mod.method("test", []() { return 0; });
-    mod.add_type<NodeJSInstance>("NodeJSInstance")
-        .constructor<void *>()
-        .method("initialize", &NodeJSInstance::Initialize);
+    mod.add_type<jlnode::Instance>("NodeJsInstance")
+        .constructor()
+        .method("initialize", &jlnode::Instance::Initialize);
 }
