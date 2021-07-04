@@ -2,12 +2,6 @@
 
 namespace jlnode_addon {
 
-//NAN_METHOD(Initialize) {
-//    int result = Nan::To<int>(info[0]).FromJust();
-//
-//    info.GetReturnValue().Set(result);
-//}
-
 Napi::BigInt Initialize(const Napi::CallbackInfo &info) {
     auto env = info.Env();
     auto env_napi = env.operator napi_env();

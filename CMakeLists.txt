@@ -12,8 +12,11 @@ add_definitions(-DNAPI_VERSION=8)
 set(source_path "${CMAKE_CURRENT_SOURCE_DIR}/src")
 set(sources
         ${source_path}/module.cpp
+        ${source_path}/conversions.cpp
         ${source_path}/instance.cpp)
 set(headers
+        ${source_path}/utils.h
+        ${source_path}/conversions.h
         ${source_path}/instance.h)
 
 add_library(${PROJECT_NAME}

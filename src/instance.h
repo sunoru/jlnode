@@ -61,4 +61,7 @@ private:
 };
 
 }
+
+extern jlnode::Instance *instance;
+
 #endif //JLNODE_INSTANCE_H
