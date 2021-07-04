@@ -25,8 +25,7 @@ Environment::Environment(
     node::FreeEnvironment
 ) {}
 
-Instance::Instance() {
-}
+Instance::Instance() = default;
 
 int Instance::Initialize() {
     char pt[256];
@@ -71,17 +70,26 @@ int Instance::Initialize() {
         "  require('module').createRequire(process.cwd() + '/')\n"
         "globalThis.require = publicRequire\n"
         "const addon = publicRequire(`./build/lib/jlnode_addon.node`)\n"
-        "console.log(addon.initialize(123))\n"
+        "return addon.initialize()\n"
     );
     if (load_env_ret.IsEmpty()) {
         return 1;
     }
+    auto t = load_env_ret.ToLocalChecked();
+    if (!t->IsBigInt()) {
+        char buffer[256];
+        t->ToDetailString(context).ToLocalChecked()->WriteUtf8(isolate, buffer);
+        fprintf(stderr, "%s: %s should be an uint64_t\n", pt, buffer);
+        return 1;
+    }
+    env_napi = new Napi::Env((napi_env) t->ToBigInt(context).ToLocalChecked()->Uint64Value());
 
+    initialized = true;
     return 0;
 }
 
-int Instance::Run(const std::string scripts) {
-    return 0;
+Napi::Value Instance::Run(const std::string &scripts) const {
+    return env_napi->RunScript(scripts);
 }
 
 int Instance::Dispose() {
@@ -101,6 +109,8 @@ int Instance::Dispose() {
             more = uv_loop_alive(&event_loop);
         } while (more);
     }
+
+    delete env_napi;
 
     auto exit_code = node::EmitExit(environment->env.get());
     node::Stop(environment->env.get());

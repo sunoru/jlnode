@@ -7,12 +7,7 @@ project(jlnode
 set(CMAKE_MACOSX_RPATH 1)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
 
-find_package(JlCxx)
-get_target_property(JlCxx_location JlCxx::cxxwrap_julia LOCATION)
-get_filename_component(JlCxx_location ${JlCxx_location} DIRECTORY)
-set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib;${JlCxx_location}")
-
-message(STATUS "Found JlCxx at ${JlCxx_location}")
+add_definitions(-DNAPI_VERSION=8)
 
 set(source_path "${CMAKE_CURRENT_SOURCE_DIR}/src")
 set(sources
@@ -40,14 +35,21 @@ find_library(NODEJS_LIBRARY
         PATHS ${CMAKE_CURRENT_SOURCE_DIR}/node/out/${CMAKE_BUILD_TYPE})
 
 target_link_libraries(${PROJECT_NAME}
-        JlCxx::cxxwrap_julia
         ${NODEJS_LIBRARY})
+
+execute_process(
+        COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/node/out/${CMAKE_BUILD_TYPE}/node -p "require('path').resolve(require('node-addon-api').include_dir)"
+        OUTPUT_VARIABLE NAPI_INC
+)
+
+message(STATUS "NAPI_INC: ${NAPI_INC}")
 
 target_include_directories(${PROJECT_NAME}
         PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/node/src
         ${CMAKE_CURRENT_SOURCE_DIR}/node/deps/v8/include
-        ${CMAKE_CURRENT_SOURCE_DIR}/node/deps/uv/include)
+        ${CMAKE_CURRENT_SOURCE_DIR}/node/deps/uv/include
+        ${NAPI_INC})
 
 
 project(jlnode_addon
@@ -67,7 +69,10 @@ add_library(${PROJECT_NAME}
 
 set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "" SUFFIX ".node")
 
-target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_JS_INC})
+target_include_directories(${PROJECT_NAME}
+        PRIVATE
+        ${CMAKE_JS_INC}
+        ${NAPI_INC})
 
 target_link_libraries(${PROJECT_NAME}
         ${CMAKE_JS_LIB}

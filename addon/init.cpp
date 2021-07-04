@@ -8,12 +8,11 @@ namespace jlnode_addon {
 //    info.GetReturnValue().Set(result);
 //}
 
-napi_value Initialize(napi_env env, napi_callback_info info) {
-    napi_status status;
-    napi_value ret;
-    status = napi_create_int64(env, (int64_t) env, &ret);
-    assert(status == napi_ok);
-    return ret;
+Napi::BigInt Initialize(const Napi::CallbackInfo &info) {
+    auto env = info.Env();
+    auto env_napi = env.operator napi_env();
+    auto env_ptr = reinterpret_cast<uint64_t>(env_napi);
+    return Napi::BigInt::New(env_napi, env_ptr);
 }
 
 }

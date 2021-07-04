@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "cmake-js build --CDJulia_EXECUTABLE=`which julia-1.6`",
+    "build": "cmake-js build",
     "install": "cmake-js compile"
   },
   "repository": {
@@ -19,6 +19,6 @@
   "homepage": "https://github.com/sunoru/jlnode#readme",
   "dependencies": {
     "cmake-js": "^6.1.0",
-    "nan": "^2.14.2"
+    "node-addon-api": "^4.0.0"
   }
 }

@@ -5,6 +5,7 @@
 
 #include <node.h>
 #include <uv.h>
+#include <napi.h>
 
 namespace jlnode {
 
@@ -16,10 +17,10 @@ public:
     v8::HandleScope handle_scope;
 
     Config(
-            v8::Isolate *isolate,
-            uv_loop_t *loop,
-            node::MultiIsolatePlatform *platform,
-            node::ArrayBufferAllocator *allocator
+        v8::Isolate *isolate,
+        uv_loop_t *loop,
+        node::MultiIsolatePlatform *platform,
+        node::ArrayBufferAllocator *allocator
     );
 };
 
@@ -29,10 +30,10 @@ public:
     std::unique_ptr<node::Environment, decltype(&node::FreeEnvironment)> env;
 
     Environment(
-            Config &config,
-            v8::Local<v8::Context> context,
-            std::vector<std::string> &args,
-            std::vector<std::string> &exec_args
+        Config &config,
+        v8::Local<v8::Context> context,
+        std::vector<std::string> &args,
+        std::vector<std::string> &exec_args
     );
 };
 
@@ -45,17 +46,19 @@ public:
     Config *config;
     v8::Local<v8::Context> context;
     Environment *environment;
+    Napi::Env *env_napi;
 
     Instance();
 
     int Initialize();
+
     int Dispose();
 
-    int Run(std::string scripts);
+    Napi::Value Run(const std::string &scripts) const;
 
 private:
-    bool initialized;
+    bool initialized = false;
 };
-}
 
+}
 #endif //JLNODE_INSTANCE_H
