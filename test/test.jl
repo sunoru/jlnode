@@ -29,8 +29,8 @@ end
 _free_string(s) = @ccall :libnapi_wrap.free_string(s::Ptr{Cchar})::Cvoid
 
 test() = @ccall :libjlnode.test()::Cint
-initialize() = begin
-    ret = @ccall :libjlnode.initialize()::Cint
+initialize(addon_path) = begin
+    ret = @ccall :libjlnode.initialize(addon_path::Cstring)::Cint
     Env[] = @ccall :libnapi_wrap.get_global_env()::Ptr{Cvoid}
     ret
 end
@@ -60,7 +60,7 @@ end
 end
 
 @show NodeCall.test()
-@show NodeCall.initialize()
+@show NodeCall.initialize(joinpath(@__DIR__, "../build/lib/jlnode_addon.node"))
 @show NodeCall.Env[]
 
 @show NodeCall.run("console.log(Math.random())")

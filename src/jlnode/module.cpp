@@ -10,9 +10,9 @@ extern "C" {
 
 int test() { return 20070128; }
 
-int initialize() {
+int initialize(const char *addon_path) {
     instance = new jlnode::Instance;
-    return instance->Initialize();
+    return instance->Initialize(addon_path);
 }
 
 int dispose() {

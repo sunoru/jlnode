@@ -2,6 +2,11 @@
 
 using v8::V8;
 
+std::string get_initialization_scripts(const char *addon_path) {
+    return "globalThis.require = require('module').createRequire(process.cwd() + '/')\n"
+           "return globalThis.require('" + std::string(addon_path) + "').initialize()";
+}
+
 namespace jlnode {
 
 Config::Config(
@@ -27,7 +32,7 @@ Environment::Environment(
 
 Instance::Instance() = default;
 
-int Instance::Initialize() {
+int Instance::Initialize(const char *addon_path) {
     char pt[256];
     uv_get_process_title(pt, 256);
     std::vector<std::string> args{std::string(pt)};
@@ -64,13 +69,10 @@ int Instance::Initialize() {
         return 1;
     }
     environment = new Environment(*config, context, args, exec_args);
+    auto init_scripts = get_initialization_scripts(addon_path);
     auto load_env_ret = node::LoadEnvironment(
         environment->env.get(),
-        "const publicRequire ="
-        "  require('module').createRequire(process.cwd() + '/')\n"
-        "globalThis.require = publicRequire\n"
-        "const addon = publicRequire(`./build/lib/jlnode_addon.node`)\n"
-        "return addon.initialize()\n"
+        init_scripts.c_str()
     );
     if (load_env_ret.IsEmpty()) {
         return 1;

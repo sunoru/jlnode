@@ -51,7 +51,7 @@ public:
 
     Instance();
 
-    int Initialize();
+    int Initialize(const char *addon_path);
 
     int Dispose();
 

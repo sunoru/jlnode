@@ -3,6 +3,7 @@
 
 #include <napi.h>
 #include "env.h"
+#include "utils/wrappers.h"
 
 extern "C" {
 
@@ -10,11 +11,11 @@ napi_handle_scope open_handle_scope(napi_env env);
 
 void close_handle_scope(napi_env env, napi_handle_scope scope);
 
-napi_value dereference(napi_env env, napi_ref ref);
+napi_value dereference(JlnodeResult *result, napi_env env, napi_ref ref);
 
-napi_ref make_reference(napi_env env, napi_value value);
+napi_ref make_reference(JlnodeResult *result, napi_env env, napi_value value);
 
-void free_reference(napi_env env, napi_ref ref);
+void free_reference(JlnodeResult *result, napi_env env, napi_ref ref);
 
 }
 
