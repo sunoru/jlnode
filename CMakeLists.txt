@@ -32,7 +32,9 @@ project(napi_wrap
 
 set(napi_wrap_path "${CMAKE_CURRENT_SOURCE_DIR}/src/napi_wrap")
 set(napi_wrap_sources
+        ${napi_wrap_path}/utils/strings.cpp
         ${napi_wrap_path}/module.cpp
+        ${napi_wrap_path}/memory.cpp
         ${napi_wrap_path}/env.cpp)
 set(napi_wrap_headers
         ${napi_wrap_path}/utils/strings.h

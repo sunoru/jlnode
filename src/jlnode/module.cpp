@@ -2,7 +2,6 @@
 
 #include "../napi_wrap/utils/strings.h"
 #include "../napi_wrap/memory.h"
-#include "../napi_wrap/types.h"
 #include "instance.h"
 
 jlnode::Instance *instance;
@@ -25,19 +24,17 @@ int dispose() {
     return ret;
 }
 
-int run(const char *scripts, void **result) {
+int run(napi_env env, const char *scripts, void **result) {
     try {
-        *result = (void *) run_script(scripts);
+        *result = (void *) run_script(env, scripts);
         return 0;
     } catch (Napi::Error &e) {
-        char *error = new char[strlen(e.what()) + 1];
-        strcpy(error, e.what());
-        *result = (void *) error;
+        size_t n;
+        *result = (void *) copy_utf8(e.what(), &n);
         return 1;
     } catch (std::exception &e) {
-        char *error = new char[strlen(e.what()) + 1];
-        strcpy(error, e.what());
-        *result = (void *) error;
+        size_t n;
+        *result = (void *) copy_utf8(e.what(), &n);
         return 2;
     }
 }

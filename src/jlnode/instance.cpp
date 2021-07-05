@@ -107,8 +107,8 @@ int Instance::Dispose() {
         } while (more);
     }
 
-    set_global_env(nullptr);
     close_handle_scope();
+    set_global_env(nullptr);
 
     auto exit_code = node::EmitExit(environment->env.get());
     node::Stop(environment->env.get());
