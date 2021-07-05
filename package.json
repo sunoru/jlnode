@@ -1,8 +1,8 @@
 {
   "name": "jlnode",
-  "version": "1.0.0",
+  "version": "14.17.2",
   "description": "",
-  "main": "index.js",
+  "main": "./build/lib/jlnode_addon.node",
   "scripts": {
     "build": "cmake-js build",
     "install": "cmake-js compile"
@@ -12,7 +12,7 @@
     "url": "git+https://github.com/sunoru/jlnode.git"
   },
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/sunoru/jlnode/issues"
   },
