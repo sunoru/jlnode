@@ -25,6 +25,14 @@ napi_handle_scope get_global_handle_scope() {
     return global_handle_scope;
 }
 
+napi_value run_script(napi_env env, const char *scripts, JlnodeResult *err) {
+    WRAP_ERROR(
+        Napi::Env _env(env);
+        return _env.RunScript(scripts);
+    )
+    return nullptr;
+}
+
 napi_value run_script(napi_env env, const std::string &scripts) {
     Napi::Env e(env);
     return e.RunScript(scripts);

@@ -83,7 +83,7 @@ int Instance::Initialize() {
         return 1;
     }
     set_global_env((void *) t->ToBigInt(context).ToLocalChecked()->Uint64Value());
-    open_handle_scope();
+    set_global_handle_scope(open_handle_scope(get_global_env()));
 
     initialized = true;
     return 0;
@@ -107,7 +107,7 @@ int Instance::Dispose() {
         } while (more);
     }
 
-    close_handle_scope();
+    close_handle_scope(get_global_env(), get_global_handle_scope());
     set_global_env(nullptr);
 
     auto exit_code = node::EmitExit(environment->env.get());

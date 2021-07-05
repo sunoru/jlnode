@@ -9,10 +9,19 @@ const libjlnode = Libdl.dlopen(joinpath(dirname(@__DIR__), "build/lib/libjlnode"
 const NapiValue = Ptr{Nothing}
 const Env = Ref(Ptr{Nothing}())
 
+struct JlnodeResult
+    code::Int32
+    message::Cstring
+end
+const err = Ref(JlnodeResult(0, C_NULL))
+
 function _to_string(v)
-    s = @ccall :libnapi_wrap.value_to_string(Env[]::NapiValue, v::NapiValue)::NapiValue
+    s = @ccall :libnapi_wrap.value_to_string(Env[]::NapiValue, v::NapiValue, err::Ptr{JlnodeResult})::NapiValue
     len = Ref{UInt}()
-    ss = @ccall :libnapi_wrap.string_to_utf8(Env[]::NapiValue, s::NapiValue, len::Ptr{Csize_t})::Ptr{Cchar}
+    ss = @ccall :libnapi_wrap.string_to_utf8(
+        Env[]::NapiValue, s::NapiValue,
+        err::Ptr{JlnodeResult}, len::Ptr{Csize_t}
+    )::Ptr{Cchar}
     @show len
     ss
 end
@@ -24,23 +33,26 @@ initialize() = begin
     Env[] = @ccall :libnapi_wrap.get_global_env()::Ptr{Cvoid}
     ret
 end
-open_handle_scope() = @ccall :libnapi_wrap.open_handle_scope()::Ptr{Cvoid}
-close_handle_scope() = @ccall :libnapi_wrap.close_handle_scope()::Cvoid
 dispose() = @ccall :libjlnode.dispose()::Cint
+
 function run(scripts::AbstractString)
-    result = Ref(NapiValue())
-    ret = @ccall :libjlnode.run(Env[]::NapiValue, scripts::Cstring, result::Ptr{Ptr{Cvoid}})::Cint
-    if ret == 1 || ret == 2
-        @error unsafe_string(Ptr{Cchar}(result[]))
-        _free_string(result[])
+    result = Ref{NapiValue}()
+    result = @ccall :libjlnode.run_script(Env[]::NapiValue, scripts::Cstring, err::Ptr{JlnodeResult})::NapiValue
+    if err[].code == 1 || err[].code == 2
+        @error unsafe_string(err[].message)
     else
-        s = _to_string(result[])
-        t = @ccall :libnapi_wrap.value_type(Env[]::NapiValue, result[]::NapiValue)::Cint
+        s = _to_string(result)
+        t = @ccall :libnapi_wrap.value_type(
+            Env[]::NapiValue, result::NapiValue, err::Ptr{JlnodeResult}
+        )::Cint
+        if err[].code != 0
+            @error unsafe_string(err[].message)
+        end
         @info "Type: $t"
         @info unsafe_string(s)
         _free_string(s)
     end
-    ret
+    err[].code
 end
 
 end

@@ -1,27 +1,21 @@
 #ifndef JLNODE_NAPI_WRAP_TYPES_H
 #define JLNODE_NAPI_WRAP_TYPES_H
 
-#define ESC(...) __VA_ARGS__
-
-#define WRAP_NAPI_FUNCTION_VOID(NAME, VALUE_TYPE, FUNCTION, ARGS, ...) \
-    void NAME(napi_env env, napi_value value, ## __VA_ARGS__) {         \
-        Napi::VALUE_TYPE v(env, value);                                 \
-        v.FUNCTION(ARGS);                                               \
-    }
-#define WRAP_NAPI_FUNCTION(NAME, RETURN_TYPE, VALUE_TYPE, FUNCTION, ARGS, ...) \
-    RETURN_TYPE NAME(napi_env env, napi_value value, ## __VA_ARGS__) {          \
-        Napi::VALUE_TYPE v(env, value);                                         \
-        return v.FUNCTION(ARGS);                                                \
-    }
-
 #define WRAP_NAPI_CONVERSION(NAME, FUNCTION) \
-    napi_value NAME(napi_env env, napi_value value) { \
-        Napi::Value v(env, value);                    \
-        return v.FUNCTION();                          \
+    napi_value NAME(                         \
+        napi_env env, napi_value value,      \
+        JlnodeResult *err                    \
+    ) {                                      \
+        WRAP_ERROR(                                   \
+            Napi::Value v(env, value);                \
+            return v.FUNCTION();                      \
+        )                                             \
+        return nullptr;                               \
     }
 
 #include <cstdint>
 #include <napi.h>
+#include "utils/wrappers.h"
 #include "utils/strings.h"
 #include "env.h"
 
@@ -60,16 +54,22 @@ WRAP_NAPI_FUNCTION(date_to_double, double, Date, ValueOf,)
 
 // Name (no methods)
 // String
-const char *string_to_utf8(napi_env env, napi_value value, size_t *len) {
-    Napi::String v(env, value);
-    auto s = v.Utf8Value();
-    return copy_utf8(s, len);
+const char *string_to_utf8(napi_env env, napi_value value, JlnodeResult *err, size_t *len) {
+    WRAP_ERROR(
+        Napi::String v(env, value);
+        auto s = v.Utf8Value();
+        return copy_utf8(s, len);
+    )
+    return nullptr;
 }
 
-const char *string_to_utf16(napi_env env, napi_value value, size_t *len) {
-    Napi::String v(env, value);
-    auto s = v.Utf16Value();
-    return copy_utf16(s, len);
+const char *string_to_utf16(napi_env env, napi_value value, JlnodeResult *err, size_t *len) {
+    WRAP_ERROR(
+        Napi::String v(env, value);
+        auto s = v.Utf16Value();
+        return copy_utf16(s, len);
+    )
+    return nullptr;
 }
 
 }

@@ -24,19 +24,4 @@ int dispose() {
     return ret;
 }
 
-int run(napi_env env, const char *scripts, void **result) {
-    try {
-        *result = (void *) run_script(env, scripts);
-        return 0;
-    } catch (Napi::Error &e) {
-        size_t n;
-        *result = (void *) copy_utf8(e.what(), &n);
-        return 1;
-    } catch (std::exception &e) {
-        size_t n;
-        *result = (void *) copy_utf8(e.what(), &n);
-        return 2;
-    }
-}
-
 }
