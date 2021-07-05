@@ -32,8 +32,3 @@ napi_value run_script(napi_env env, const char *scripts, JlnodeResult *err) {
     )
     return nullptr;
 }
-
-napi_value run_script(napi_env env, const std::string &scripts) {
-    Napi::Env e(env);
-    return e.RunScript(scripts);
-}
