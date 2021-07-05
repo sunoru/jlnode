@@ -1,16 +1,11 @@
 #include <string>
 
+#include "../napi_wrap/utils/strings.h"
+#include "../napi_wrap/memory.h"
+#include "../napi_wrap/types.h"
 #include "instance.h"
 
 jlnode::Instance *instance;
-
-//JLCXX_MODULE define_julia_module(jlcxx::Module &mod) {
-//    mod.method("test", []() { return 0; });
-//    mod.add_type<jlnode::Instance>("NodeJsInstance")
-//        .constructor()
-//        .method("initialize", &jlnode::Instance::Initialize)
-//        .method("dispose", &jlnode::Instance::Dispose);
-//}
 
 extern "C" {
 
@@ -32,7 +27,7 @@ int dispose() {
 
 int run(const char *scripts, void **result) {
     try {
-        *result = (void *) instance->Run(scripts).operator napi_value();
+        *result = (void *) run_script(scripts);
         return 0;
     } catch (Napi::Error &e) {
         char *error = new char[strlen(e.what()) + 1];

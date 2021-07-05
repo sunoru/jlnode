@@ -82,14 +82,11 @@ int Instance::Initialize() {
         fprintf(stderr, "%s: %s should be an uint64_t\n", pt, buffer);
         return 1;
     }
-    env_napi = new Napi::Env((napi_env) t->ToBigInt(context).ToLocalChecked()->Uint64Value());
+    set_global_env((void *) t->ToBigInt(context).ToLocalChecked()->Uint64Value());
+    open_handle_scope();
 
     initialized = true;
     return 0;
-}
-
-Napi::Value Instance::Run(const std::string &scripts) const {
-    return env_napi->RunScript(scripts);
 }
 
 int Instance::Dispose() {
@@ -110,7 +107,8 @@ int Instance::Dispose() {
         } while (more);
     }
 
-    delete env_napi;
+    set_global_env(nullptr);
+    close_handle_scope();
 
     auto exit_code = node::EmitExit(environment->env.get());
     node::Stop(environment->env.get());
