@@ -16,11 +16,12 @@ end
 const err = Ref(JlnodeResult(0, C_NULL))
 
 function _to_string(v)
-    s = @ccall :libnapi_wrap.value_to_string(Env[]::NapiValue, v::NapiValue, err::Ptr{JlnodeResult})::NapiValue
+    s = @ccall :libnapi_wrap.value_to_string(err::Ptr{JlnodeResult}, Env[]::NapiValue, v::NapiValue)::NapiValue
     len = Ref{UInt}()
     ss = @ccall :libnapi_wrap.string_to_utf8(
-        Env[]::NapiValue, s::NapiValue,
-        err::Ptr{JlnodeResult}, len::Ptr{Csize_t}
+        err::Ptr{JlnodeResult}, Env[]::NapiValue,
+        s::NapiValue,
+        len::Ptr{Csize_t}
     )::Ptr{Cchar}
     @show len
     ss
@@ -37,13 +38,14 @@ dispose() = @ccall :libjlnode.dispose()::Cint
 
 function run(scripts::AbstractString)
     result = Ref{NapiValue}()
-    result = @ccall :libjlnode.run_script(Env[]::NapiValue, scripts::Cstring, err::Ptr{JlnodeResult})::NapiValue
+    result = @ccall :libjlnode.run_script(err::Ptr{JlnodeResult}, Env[]::NapiValue, scripts::Cstring)::NapiValue
     if err[].code == 1 || err[].code == 2
         @error unsafe_string(err[].message)
     else
         s = _to_string(result)
         t = @ccall :libnapi_wrap.value_type(
-            Env[]::NapiValue, result::NapiValue, err::Ptr{JlnodeResult}
+            err::Ptr{JlnodeResult},
+            Env[]::NapiValue, result::NapiValue
         )::Cint
         if err[].code != 0
             @error unsafe_string(err[].message)

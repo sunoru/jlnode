@@ -15,7 +15,7 @@ napi_env get_global_env();
 
 napi_handle_scope get_global_handle_scope();
 
-napi_value run_script(napi_env env, const char *scripts, JlnodeResult *err);
+napi_value run_script(JlnodeResult *_result, napi_env env, const char *scripts);
 
 }
 

@@ -2,7 +2,4 @@
 set -ex
 
 cd `dirname $(realpath $0)`/..
-mkdir -p cmake-build
-cd cmake-build
-cmake ..
-cmake --build .
+./node/node ./node/deps/npm/bin/npm-cli.js run install

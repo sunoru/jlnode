@@ -7,23 +7,24 @@
 
 #define ESC(...) __VA_ARGS__
 
-#define WRAP_ERROR(...) if (err->message != nullptr) { \
-        free_string(err->message);                     \
-        err->message = nullptr;                        \
+#define WRAP_ERROR(...) if (_result->message != nullptr) { \
+        free_string(_result->message);                     \
+        _result->message = nullptr;                        \
     }                           \
-    *err = JlnodeResult::Ok();   \
+    *_result = JlnodeResult::Ok();   \
     try {               \
         __VA_ARGS__       \
     } catch (Napi::Error &e) {       \
-        *err = JlnodeResult::From(e); \
+        *_result = JlnodeResult::From(e); \
     } catch (std::exception &e) {     \
-        *err = JlnodeResult::From(e); \
+        *_result = JlnodeResult::From(e); \
     }
 
 #define WRAP_NAPI_FUNCTION_VOID(NAME, VALUE_TYPE, FUNCTION, ...) \
     void NAME(                                                         \
-        napi_env _env, napi_value _value,                              \
-        JlnodeResult *err, ## __VA_ARGS__) {                           \
+        JlnodeResult *_result, napi_env _env,                          \
+        napi_value _value,                              \
+        ## __VA_ARGS__) {                           \
         WRAP_ERROR(                                                    \
             Napi::VALUE_TYPE _v(_env, _value);                         \
             _v.FUNCTION;                                         \
@@ -32,8 +33,8 @@
 
 #define WRAP_NAPI_FUNCTION(NAME, RETURN_TYPE, VALUE_TYPE, FUNCTION, ...) \
     RETURN_TYPE NAME(                                                          \
-        napi_env _env, napi_value _value,                                      \
-        JlnodeResult *err, ## __VA_ARGS__) {                                   \
+        JlnodeResult *_result, napi_env _env,                                  \
+        napi_value _value, ## __VA_ARGS__) {                                   \
         WRAP_ERROR(                                                            \
             Napi::VALUE_TYPE _v(_env, _value);                                 \
             return _v.FUNCTION;                                          \
@@ -42,9 +43,9 @@
     }
 
 #define WRAP_NAPI_FUNCTION_PTR(NAME, RETURN_TYPE, VALUE_TYPE, FUNCTION, ...) \
-    RETURN_TYPE *NAME(                                                          \
-        napi_env _env, napi_value _value,                                      \
-        JlnodeResult *err, ## __VA_ARGS__) {                                   \
+    RETURN_TYPE *NAME(                                                         \
+        JlnodeResult *_result, napi_env _env,   \
+        napi_value _value, ## __VA_ARGS__) {                                   \
         WRAP_ERROR(                                                            \
             Napi::VALUE_TYPE _v(_env, _value);                                 \
             return _v.FUNCTION;                                          \
@@ -53,8 +54,7 @@
     }
 
 #define WRAP_NAPI_FUNCTION_STATIC(NAME, RETURN_TYPE, FUNCTION, ...) \
-    RETURN_TYPE NAME(                                                          \
-        napi_env _env, JlnodeResult *err, ## __VA_ARGS__) {                                   \
+    RETURN_TYPE NAME(JlnodeResult *_result, napi_env _env, ## __VA_ARGS__) {   \
         WRAP_ERROR(                                                            \
             return Napi::FUNCTION;                                          \
         )                                                                      \

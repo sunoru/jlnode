@@ -43,7 +43,7 @@ set(napi_wrap_headers
         ${napi_wrap_path}/env.h
         ${napi_wrap_path}/errors.h
         ${napi_wrap_path}/memory.h
-        ${napi_wrap_path}/types.h)
+        ${napi_wrap_path}/values.h)
 
 add_library(${PROJECT_NAME}
         SHARED ${napi_wrap_sources} ${napi_wrap_headers}

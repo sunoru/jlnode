@@ -36,8 +36,21 @@ WRAP_NAPI_CONSTRUCTION(value_from_int64, Number, int64_t)
 WRAP_NAPI_CONSTRUCTION(value_from_float, Number, float)
 WRAP_NAPI_CONSTRUCTION(value_from_double, Number, double)
 WRAP_NAPI_CONSTRUCTION(value_from_str, String, const char *)
-WRAP_NAPI_CONSTRUCTION(value_from_external, External < void >, void *)
-napi_value value_from_value(napi_env env, napi_value value, JlnodeResult *err) {
+napi_value value_from_external(
+    JlnodeResult *_result, napi_env env,
+    void *data,
+    napi_finalize finalize_callback,
+    void *finalize_hint
+) {
+    WRAP_ERROR(
+        napi_value external;
+        auto status = napi_create_external(
+            env, data, finalize_callback, finalize_hint, &external);
+        return external;
+    )
+    return nullptr;
+}
+napi_value value_from_value(JlnodeResult *_result, napi_env env, napi_value value) {
     WRAP_ERROR(
         return Napi::Value::From(env, value);
     )
@@ -55,8 +68,8 @@ WRAP_NAPI_FUNCTION(value_is_date, bool, Value, IsDate())
 WRAP_NAPI_FUNCTION(value_is_string, bool, Value, IsString())
 WRAP_NAPI_FUNCTION(value_is_symbol, bool, Value, IsSymbol())
 WRAP_NAPI_FUNCTION(value_is_array, bool, Value, IsArray())
-WRAP_NAPI_FUNCTION(value_is_array_buffer, bool, Value, IsArrayBuffer())
-WRAP_NAPI_FUNCTION(value_is_typed_array, bool, Value, IsTypedArray())
+WRAP_NAPI_FUNCTION(value_is_arraybuffer, bool, Value, IsArrayBuffer())
+WRAP_NAPI_FUNCTION(value_is_typedarray, bool, Value, IsTypedArray())
 WRAP_NAPI_FUNCTION(value_is_object, bool, Value, IsObject())
 WRAP_NAPI_FUNCTION(value_is_function, bool, Value, IsFunction())
 WRAP_NAPI_FUNCTION(value_is_promise, bool, Value, IsPromise())
@@ -88,7 +101,7 @@ WRAP_NAPI_FUNCTION(date_to_double, double, Date, ValueOf())
 
 // Name (no methods)
 // String
-const char *string_to_utf8(napi_env env, napi_value value, JlnodeResult *err, size_t *len) {
+const char *string_to_utf8(JlnodeResult *_result, napi_env env, napi_value value, size_t *len) {
     WRAP_ERROR(
         Napi::String v(env, value);
         auto s = v.Utf8Value();
@@ -97,7 +110,7 @@ const char *string_to_utf8(napi_env env, napi_value value, JlnodeResult *err, si
     return nullptr;
 }
 
-const char *string_to_utf16(napi_env env, napi_value value, JlnodeResult *err, size_t *len) {
+const char *string_to_utf16(JlnodeResult *_result, napi_env env, napi_value value, size_t *len) {
     WRAP_ERROR(
         Napi::String v(env, value);
         auto s = v.Utf16Value();
@@ -107,7 +120,7 @@ const char *string_to_utf16(napi_env env, napi_value value, JlnodeResult *err, s
 }
 
 // Symbol
-napi_value symbol_get_well_known(napi_env env, const char *name, JlnodeResult *err) {
+napi_value symbol_get_well_known(JlnodeResult *_result, napi_env env, const char *name) {
     WRAP_ERROR(return Napi::Symbol::WellKnown(env, name);)
     return nullptr;
 }
@@ -139,39 +152,46 @@ WRAP_NAPI_FUNCTION_PTR(external_get_data, void, External < void >, Data())
 WRAP_NAPI_FUNCTION(array_get_length, uint32_t, Array, Length())
 
 // ArrayBuffer
-// TODO: implement Finalizer and Hint
-napi_value array_buffer_from_external(napi_env env, size_t byte_length, JlnodeResult *err, void *external_data) {
+napi_value arraybuffer_from_external(
+    JlnodeResult *_result, napi_env env,
+    size_t byte_length, void *external_data,
+    napi_finalize finalize_callback,
+    void *finalize_hint
+) {
     WRAP_ERROR(
         if (external_data == nullptr) {
             return Napi::ArrayBuffer::New(env, byte_length);
         }
-        return Napi::ArrayBuffer::New(env, external_data, byte_length);
+        napi_value result;
+        auto status = napi_create_external_arraybuffer(
+            env, external_data, byte_length, finalize_callback, finalize_hint, &result);
+        return result;
     )
     return nullptr;
 }
-WRAP_NAPI_FUNCTION_PTR(array_buffer_get_data, void, ArrayBuffer, Data())
-WRAP_NAPI_FUNCTION(array_buffer_get_byte_length, size_t, ArrayBuffer, ByteLength())
+WRAP_NAPI_FUNCTION_PTR(arraybuffer_get_data, void, ArrayBuffer, Data())
+WRAP_NAPI_FUNCTION(arraybuffer_get_byte_length, size_t, ArrayBuffer, ByteLength())
 
 // TypedArray
-WRAP_NAPI_CONVERSION(typed_array_to_array_buffer, TypedArray, ArrayBuffer())
-WRAP_NAPI_FUNCTION(typed_array_get_type, napi_typedarray_type, TypedArray, TypedArrayType())
-WRAP_NAPI_FUNCTION(typed_array_element_size, uint8_t, TypedArray, ElementSize())
-WRAP_NAPI_FUNCTION(typed_array_element_length, size_t, TypedArray, ElementLength())
-WRAP_NAPI_FUNCTION(typed_array_byte_offset, size_t, TypedArray, ByteOffset())
-WRAP_NAPI_FUNCTION(typed_array_byte_length, size_t, TypedArray, ByteLength())
+WRAP_NAPI_CONVERSION(typedarray_to_arraybuffer, TypedArray, ArrayBuffer())
+WRAP_NAPI_FUNCTION(typedarray_get_type, napi_typedarray_type, TypedArray, TypedArrayType())
+WRAP_NAPI_FUNCTION(typedarray_element_size, uint8_t, TypedArray, ElementSize())
+WRAP_NAPI_FUNCTION(typedarray_element_length, size_t, TypedArray, ElementLength())
+WRAP_NAPI_FUNCTION(typedarray_byte_offset, size_t, TypedArray, ByteOffset())
+WRAP_NAPI_FUNCTION(typedarray_byte_length, size_t, TypedArray, ByteLength())
 
 // TypedArrayOf
 
 #define WRAP_NAPI_TYPED_ARRAY_OF(TYPE_NAME, TYPE) \
     WRAP_NAPI_FUNCTION_STATIC(         \
-        TYPE_NAME ## _array_from_length,\
+        TYPE_NAME ## _array_create,\
         napi_value,                    \
         TypedArrayOf<TYPE>::New(_env, element_length, element_type), \
         size_t element_length, napi_typedarray_type element_type \
     )                                  \
                                        \
     WRAP_NAPI_FUNCTION_STATIC(         \
-        TYPE_NAME ## _array_from_array_buffer,\
+        TYPE_NAME ## _array_from_arraybuffer,\
         napi_value,                    \
         TypedArrayOf<TYPE>::New(_env, element_length, Napi::ArrayBuffer(_env, buffer), buffer_offset, element_type), \
         size_t element_length, napi_typedarray_type element_type,\
@@ -209,6 +229,115 @@ WRAP_NAPI_TYPED_ARRAY_OF(float32, float)
 WRAP_NAPI_TYPED_ARRAY_OF(float64, double)
 WRAP_NAPI_TYPED_ARRAY_OF(bigint64, int64_t)
 WRAP_NAPI_TYPED_ARRAY_OF(biguint64, uint64_t)
+
+// Function
+napi_value function_create(
+    JlnodeResult *_result, napi_env env,
+    const char *name, napi_callback callback, uint8_t *data
+) {
+    WRAP_ERROR(
+        napi_value result;
+        auto status = Napi::CreateFunction(env, name, callback, data, &result);
+        NAPI_THROW_IF_FAILED(env, status);
+        return result;
+    )
+    return nullptr;
+}
+WRAP_NAPI_FUNCTION(
+    function_call, napi_value, Function,
+    Call(recv, argc, args),
+    napi_value recv, size_t argc, const napi_value *args
+)
+WRAP_NAPI_FUNCTION(
+    function_call_without_this, napi_value, Function,
+    Call(argc, args),
+    size_t argc, const napi_value *args
+)
+WRAP_NAPI_FUNCTION(
+    function_make_callback, napi_value, Function,
+    MakeCallback(recv, argc, args, context),
+    napi_value recv, size_t argc, const napi_value *args, napi_async_context context
+)
+WRAP_NAPI_FUNCTION(
+    function_new, napi_value, Function,
+    New(argc, args),
+    size_t argc, const napi_value *args
+)
+
+// Promise
+napi_value promise_create(
+    JlnodeResult *_result, napi_env env,
+    napi_deferred *deferred
+) {
+    WRAP_ERROR(
+        napi_value promise;
+        auto status = napi_create_promise(env, deferred, &promise);
+        NAPI_THROW_IF_FAILED_VOID(env, status);
+        return promise;
+    )
+    return nullptr;
+}
+void promise_deferred_resolve(
+    JlnodeResult *_result, napi_env env,
+    napi_deferred deferred, napi_value resolution
+) {
+    WRAP_ERROR(
+        auto status = napi_resolve_deferred(env, deferred, resolution);
+        NAPI_THROW_IF_FAILED_VOID(env, status);
+    )
+}
+void promise_deferred_reject(
+    JlnodeResult *_result, napi_env env,
+    napi_deferred deferred, napi_value rejection
+) {
+    WRAP_ERROR(
+        auto status = napi_reject_deferred(env, deferred, rejection);
+        NAPI_THROW_IF_FAILED_VOID(env, status);
+    )
+}
+
+// Buffer
+napi_value buffer_create(
+    JlnodeResult *_result, napi_env env,
+    size_t size, void **data
+) {
+    WRAP_ERROR(
+        napi_value buffer;
+        auto status = napi_create_buffer(env, size, data, &buffer);
+        NAPI_THROW_IF_FAILED_VOID(env, status);
+        return buffer;
+    )
+    return nullptr;
+}
+napi_value buffer_create_copy(
+    JlnodeResult *_result, napi_env env,
+    size_t size, const void *data, void **result_data
+) {
+    WRAP_ERROR(
+        napi_value buffer;
+        auto status = napi_create_buffer_copy(env, size, data, result_data, &buffer);
+        NAPI_THROW_IF_FAILED_VOID(env, status);
+        return buffer;
+    )
+    return nullptr;
+}
+napi_value buffer_from_external(
+    JlnodeResult *_result, napi_env env,
+    size_t size, void **data,
+    napi_finalize finalize_callback,
+    void *finalize_hint
+) {
+    WRAP_ERROR(
+        napi_value buffer;
+        auto status = napi_create_external_buffer(env, size, data, finalize_callback, finalize_hint, &buffer);
+        NAPI_THROW_IF_FAILED_VOID(env, status);
+        return buffer;
+    )
+    return nullptr;
+}
+WRAP_NAPI_FUNCTION(buffer_get_length, size_t, Buffer < uint8_t >, Length())
+WRAP_NAPI_FUNCTION_PTR(buffer_get_data, uint8_t, Buffer < uint8_t >, Data())
+
 
 }
 
