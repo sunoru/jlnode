@@ -41,6 +41,9 @@ jobs:
       - name: Checkout submodules
         if: steps.libnode-cache.outputs.cache-hit != 'true'
         run: git submodule update --init --recursive
+      - name: Windows prerequisites
+        if: runner.os == 'Windows'
+        run: choco install nasm
       - name: Build NodeJS as shared library
         if: steps.libnode-cache.outputs.cache-hit != 'true'
         working-directory: ./node
