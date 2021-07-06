@@ -1,3 +1,7 @@
-# NodeJS Wrapper
+# NodeJS Wrapper for Julia
 
-For being used with `CxxWrap.jl` and `NodeCall.jl`.
+See [`NodeCall.jl`](https://github.com/sunoru/NodeCall.jl).
+
+## License
+
+[MIT License]("./LICENSE.md")
