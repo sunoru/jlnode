@@ -21,8 +21,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-      - name: Checkout submodules
-        run: git submodule update --init --recursive
 
       - name: Prepare PATH
         run: echo "${prefix}/bin" >> $GITHUB_PATH
@@ -34,8 +32,12 @@ jobs:
           path: ${{ env.prefix }}
           key: ${{ runner.os }}-libnode-${{ hashFiles('.git/modules/node/HEAD') }}
 
+      - name: Checkout submodules
+        if: steps.libnode-cache.outputs.cache-hit != 'true'
+        run: git submodule update --init --recursive
       - name: Build NodeJS as shared library
         if: steps.libnode-cache.outputs.cache-hit != 'true'
+        working-directory: ./node
         run: |
           ./configure --prefix=${prefix} --shared --without-inspector
           make -j`nproc`
