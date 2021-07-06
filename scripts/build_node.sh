@@ -3,4 +3,4 @@ set -ex
 
 cd `dirname $(realpath $0)`/../node
 ./configure --shared --without-inspector
-make -j6
+make -j{nrpoc}
