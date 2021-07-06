@@ -18,6 +18,10 @@ jobs:
     env:
       prefix: $HOME/installed/jlnode
 
+    defaults:
+      run:
+        shell: bash
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
