@@ -1,10 +1,13 @@
 #!/bin/env julia-1.6
 
+
 module NodeCall
 
+const lib_path = joinpath(dirname(@__DIR__), "build/lib")
+
 using Libdl
-# const libnapi_wrap = Libdl.dlopen(joinpath(dirname(@__DIR__), "build/lib/libnapi_wrap"))
-const libjlnode = Libdl.dlopen(joinpath(dirname(@__DIR__), "build/lib/libjlnode"))
+const libjlnode = Libdl.dlopen(joinpath(lib_path, "libjlnode"))
+const libjlnode = Libdl.dlopen(joinpath(lib_path, "libjlnode"))
 
 const NapiValue = Ptr{Nothing}
 const Env = Ref(Ptr{Nothing}())
@@ -16,9 +19,9 @@ end
 const err = Ref(JlnodeResult(0, C_NULL))
 
 function _to_string(v)
-    s = @ccall :libnapi_wrap.value_to_string(err::Ptr{JlnodeResult}, Env[]::NapiValue, v::NapiValue)::NapiValue
+    s = @ccall :libjlnode.value_to_string(err::Ptr{JlnodeResult}, Env[]::NapiValue, v::NapiValue)::NapiValue
     len = Ref{UInt}()
-    ss = @ccall :libnapi_wrap.string_to_utf8(
+    ss = @ccall :libjlnode.string_to_utf8(
         err::Ptr{JlnodeResult}, Env[]::NapiValue,
         s::NapiValue,
         len::Ptr{Csize_t}
@@ -26,12 +29,12 @@ function _to_string(v)
     @show len
     ss
 end
-_free_string(s) = @ccall :libnapi_wrap.free_string(s::Ptr{Cchar})::Cvoid
+_free_string(s) = @ccall :libjlnode.free_string(s::Ptr{Cchar})::Cvoid
 
 test() = @ccall :libjlnode.test()::Cint
 initialize(addon_path) = begin
     ret = @ccall :libjlnode.initialize(addon_path::Cstring)::Cint
-    Env[] = @ccall :libnapi_wrap.get_global_env()::Ptr{Cvoid}
+    Env[] = @ccall :libjlnode.get_global_env()::Ptr{Cvoid}
     ret
 end
 dispose() = @ccall :libjlnode.dispose()::Cint
@@ -43,7 +46,7 @@ function run(scripts::AbstractString)
         @error unsafe_string(err[].message)
     else
         s = _to_string(result)
-        t = @ccall :libnapi_wrap.value_type(
+        t = @ccall :libjlnode.value_type(
             err::Ptr{JlnodeResult},
             Env[]::NapiValue, result::NapiValue
         )::Cint
@@ -60,7 +63,7 @@ end
 end
 
 @show NodeCall.test()
-@show NodeCall.initialize(joinpath(@__DIR__, "../build/lib/jlnode_addon.node"))
+@show NodeCall.initialize(joinpath(NodeCall.lib_path, "jlnode_addon.node"))
 @show NodeCall.Env[]
 
 @show NodeCall.run("console.log(Math.random())")

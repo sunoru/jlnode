@@ -6,8 +6,8 @@
 #include <node.h>
 #include <uv.h>
 #include <napi.h>
-#include "../napi_wrap/env.h"
-#include "../napi_wrap/memory.h"
+#include "napi_wrap/env.h"
+#include "napi_wrap/memory.h"
 
 namespace jlnode {
 

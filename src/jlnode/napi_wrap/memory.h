@@ -3,7 +3,7 @@
 
 #include <napi.h>
 #include "env.h"
-#include "utils/wrappers.h"
+#include "../utils/wrappers.h"
 
 extern "C" {
 

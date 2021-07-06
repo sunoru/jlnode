@@ -2,7 +2,7 @@
 #define JLNODE_NAPI_WRAP_ENV_H
 
 #include <napi.h>
-#include "utils/wrappers.h"
+#include "../utils/wrappers.h"
 #include "errors.h"
 
 void set_global_env(const void *p);

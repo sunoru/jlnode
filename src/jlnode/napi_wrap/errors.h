@@ -4,7 +4,7 @@
 #include <exception>
 #include <napi.h>
 
-#include "utils/strings.h"
+#include "../utils/strings.h"
 
 extern "C" {
 

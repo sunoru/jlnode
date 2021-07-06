@@ -3,7 +3,7 @@
 
 #include <napi.h>
 #include "strings.h"
-#include "../errors.h"
+#include "../napi_wrap/errors.h"
 
 #define ESC(...) __VA_ARGS__
 

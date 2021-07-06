@@ -1,7 +1,8 @@
 #include <string>
 
-#include "../napi_wrap/utils/strings.h"
-#include "../napi_wrap/memory.h"
+#include "utils/strings.h"
+#include "napi_wrap/memory.h"
+#include "napi_wrap/values.h"
 #include "instance.h"
 
 jlnode::Instance *instance;

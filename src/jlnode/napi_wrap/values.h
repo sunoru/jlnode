@@ -13,8 +13,8 @@
 
 #include <cstdint>
 #include <napi.h>
-#include "utils/wrappers.h"
-#include "utils/strings.h"
+#include "../utils/wrappers.h"
+#include "../utils/strings.h"
 #include "env.h"
 
 
