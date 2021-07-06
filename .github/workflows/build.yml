@@ -15,10 +15,6 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macOS-latest]
 
-    env:
-      prefix: $HOME/installed/jlnode
-
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -26,6 +22,7 @@ jobs:
       - name: Prepare environment
         shell: bash
         run: |
+          echo "prefix=${HOME}/installed/jlnode" >> $GITHUB_ENV
           echo "${prefix}/bin" >> $GITHUB_PATH
           echo "PACKAGE_VERSION=`node -p \"require('./package.json').version\"`" >> $GITHUB_ENV
 
@@ -51,7 +48,9 @@ jobs:
       - name: Build NodeJS as shared library - Windows
         if: steps.libnode-cache.outputs.cache-hit != 'true' && runner.os == 'Windows'
         working-directory: ./node
-        run: ./vcbuild.bat
+        run: ./vcbuild.bat dll
+        env:
+          config_flags: --without-inspector
 
       - name: Install built NodeJS locally
         if: steps.libnode-cache.outputs.cache-hit != 'true'
