@@ -18,15 +18,13 @@ jobs:
     env:
       prefix: $HOME/installed/jlnode
 
-    defaults:
-      run:
-        shell: bash
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
 
       - name: Prepare environment
+        shell: bash
         run: |
           echo "${prefix}/bin" >> $GITHUB_PATH
           echo "PACKAGE_VERSION=`node -p \"require('./package.json').version\"`" >> $GITHUB_ENV
@@ -45,11 +43,16 @@ jobs:
         if: runner.os == 'Windows'
         run: choco install nasm
       - name: Build NodeJS as shared library
-        if: steps.libnode-cache.outputs.cache-hit != 'true'
+        if: steps.libnode-cache.outputs.cache-hit != 'true' && runner.os != 'Windows'
         working-directory: ./node
         run: |
           ./configure --prefix=${prefix} --shared --without-inspector
           make -j`nproc`
+      - name: Build NodeJS as shared library - Windows
+        if: steps.libnode-cache.outputs.cache-hit != 'true' && runner.os == 'Windows'
+        working-directory: ./node
+        run: ./vcbuild.bat
+
       - name: Install built NodeJS locally
         if: steps.libnode-cache.outputs.cache-hit != 'true'
         working-directory: ./node
