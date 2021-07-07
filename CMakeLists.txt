@@ -56,6 +56,7 @@ target_include_directories(${PROJECT_NAME}
     ${CMAKE_CURRENT_SOURCE_DIR}/node/src
     ${CMAKE_CURRENT_SOURCE_DIR}/node/deps/v8/include
     ${CMAKE_CURRENT_SOURCE_DIR}/node/deps/uv/include
+    ${CMAKE_JS_INC}
     ${NAPI_INC})
 
 project(jlnode_addon
