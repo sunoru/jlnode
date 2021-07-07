@@ -1,6 +1,7 @@
 *.swp
 build/
 cmake-build*/
+installed/
 
 .idea/
 node_modules/

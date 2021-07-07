@@ -1,9 +1,5 @@
 #include <string>
 
-#include "utils/strings.h"
-#include "napi_wrap/async.h"
-#include "napi_wrap/memory.h"
-#include "napi_wrap/values.h"
 #include "instance.h"
 
 jlnode::Instance *instance;
@@ -12,9 +8,9 @@ extern "C" {
 
 int test() { return 20070128; }
 
-int initialize(const char *addon_path) {
+int initialize(const char *addon_path, napi_env *env) {
     instance = new jlnode::Instance;
-    return instance->Initialize(addon_path);
+    return instance->Initialize(addon_path, env);
 }
 
 int dispose() {

@@ -39,20 +39,9 @@ set(source_path "${CMAKE_CURRENT_SOURCE_DIR}/src/jlnode")
 
 set(sources
     ${source_path}/module.cpp
-    ${source_path}/instance.cpp
-    ${source_path}/napi_wrap/env.cpp
-    ${source_path}/napi_wrap/errors.cpp
-    ${source_path}/napi_wrap/memory.cpp
-    ${source_path}/utils/strings.cpp)
+    ${source_path}/instance.cpp)
 set(headers
-    ${source_path}/instance.h
-    ${source_path}/napi_wrap/env.h
-    ${source_path}/napi_wrap/errors.h
-    ${source_path}/napi_wrap/memory.h
-    ${source_path}/napi_wrap/async.h
-    ${source_path}/napi_wrap/values.h
-    ${source_path}/utils/strings.h
-    ${source_path}/utils/wrappers.h)
+    ${source_path}/instance.h)
 
 add_library(${PROJECT_NAME}
     SHARED ${sources} ${headers}

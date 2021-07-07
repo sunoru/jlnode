@@ -32,7 +32,7 @@ Environment::Environment(
 
 Instance::Instance() = default;
 
-int Instance::Initialize(const char *addon_path) {
+int Instance::Initialize(const char *addon_path, napi_env *env) {
     char pt[256];
     uv_get_process_title(pt, 256);
     std::vector<std::string> args{std::string(pt)};
@@ -84,12 +84,10 @@ int Instance::Initialize(const char *addon_path) {
         fprintf(stderr, "%s: %s should be an uint64_t\n", pt, buffer);
         return 1;
     }
-    set_global_env((void *) t->ToBigInt(context).ToLocalChecked()->Uint64Value());
-    auto result = JlnodeResult::Ok();
-    set_global_handle_scope(open_handle_scope(&result, get_global_env()));
+    *env = (napi_env) t->ToBigInt(context).ToLocalChecked()->Uint64Value();
 
     initialized = true;
-    return result.code;
+    return 0;
 }
 
 int Instance::Dispose() {
@@ -109,10 +107,6 @@ int Instance::Dispose() {
             more = uv_loop_alive(&event_loop);
         } while (more);
     }
-
-    auto result = JlnodeResult::Ok();
-    close_handle_scope(&result, get_global_env(), get_global_handle_scope());
-    set_global_env(nullptr);
 
     auto exit_code = node::EmitExit(environment->env.get());
     node::Stop(environment->env.get());

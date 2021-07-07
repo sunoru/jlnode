@@ -5,9 +5,7 @@
 
 #include <node.h>
 #include <uv.h>
-#include <napi.h>
-#include "napi_wrap/env.h"
-#include "napi_wrap/memory.h"
+#include <node_api.h>
 
 namespace jlnode {
 
@@ -51,7 +49,7 @@ public:
 
     Instance();
 
-    int Initialize(const char *addon_path);
+    int Initialize(const char *addon_path, napi_env *env);
 
     int Dispose();
 
