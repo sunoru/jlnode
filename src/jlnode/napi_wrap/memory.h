@@ -7,9 +7,9 @@
 
 extern "C" {
 
-napi_handle_scope open_handle_scope(napi_env env);
+napi_handle_scope open_handle_scope(JlnodeResult *result, napi_env env);
 
-void close_handle_scope(napi_env env, napi_handle_scope scope);
+void close_handle_scope(JlnodeResult *result, napi_env env, napi_handle_scope scope);
 
 napi_value dereference(JlnodeResult *result, napi_env env, napi_ref ref);
 

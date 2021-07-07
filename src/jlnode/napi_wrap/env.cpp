@@ -32,3 +32,55 @@ napi_value run_script(JlnodeResult *_result, napi_env env, const char *scripts) 
     )
     return nullptr;
 }
+
+napi_value env_get_global(JlnodeResult *_result, napi_env env) {
+    WRAP_ERROR(
+        Napi::Env _env(env);
+        return _env.Global();
+    )
+    return nullptr;
+}
+
+napi_value env_get_undefined(JlnodeResult *_result, napi_env env) {
+    WRAP_ERROR(
+        Napi::Env _env(env);
+        return _env.Undefined();
+    )
+    return nullptr;
+}
+
+napi_value env_get_null(JlnodeResult *_result, napi_env env) {
+    WRAP_ERROR(
+        Napi::Env _env(env);
+        return _env.Null();
+    )
+    return nullptr;
+}
+
+bool env_is_exception_pending(JlnodeResult *_result, napi_env env) {
+    bool ret;
+    auto status = napi_is_exception_pending(env, &ret);
+    ret = status == napi_ok;
+    *_result = ret ? JlnodeResult::Ok() : JlnodeResult{status, nullptr};
+    return ret;
+}
+
+const napi_node_version *get_node_version(JlnodeResult *_result, napi_env _env) {
+    WRAP_ERROR(return Napi::VersionManagement::GetNodeVersion(_env);)
+    return nullptr;
+}
+
+uint32_t get_napi_version(JlnodeResult *_result, napi_env _env) {
+    WRAP_ERROR(return Napi::VersionManagement::GetNapiVersion(_env);)
+    return uint32_t();
+}
+
+void env_get_and_clear_pending_exception(JlnodeResult *_result, napi_env env) {
+    WRAP_ERROR(
+        Napi::Env _env(env);
+        auto err = _env.GetAndClearPendingException();
+        if (!err.Value().IsUndefined()) {
+            throw Napi::Error(err);
+        }
+    )
+}

@@ -49,6 +49,7 @@ set(headers
     ${source_path}/napi_wrap/env.h
     ${source_path}/napi_wrap/errors.h
     ${source_path}/napi_wrap/memory.h
+    ${source_path}/napi_wrap/async.h
     ${source_path}/napi_wrap/values.h
     ${source_path}/utils/strings.h
     ${source_path}/utils/wrappers.h)

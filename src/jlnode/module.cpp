@@ -1,6 +1,7 @@
 #include <string>
 
 #include "utils/strings.h"
+#include "napi_wrap/async.h"
 #include "napi_wrap/memory.h"
 #include "napi_wrap/values.h"
 #include "instance.h"

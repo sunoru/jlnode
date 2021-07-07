@@ -1,17 +1,22 @@
 #include "memory.h"
 
-napi_handle_scope open_handle_scope(napi_env env) {
-    napi_handle_scope handle_scope;
-    auto status = napi_open_handle_scope(env, &handle_scope);
-    NAPI_THROW_IF_FAILED_VOID(env, status);
-    set_global_handle_scope(handle_scope);
-    return handle_scope;
+napi_handle_scope open_handle_scope(JlnodeResult *_result, napi_env env) {
+    WRAP_ERROR(
+        napi_handle_scope handle_scope;
+        auto status = napi_open_handle_scope(env, &handle_scope);
+        NAPI_THROW_IF_FAILED_VOID(env, status);
+        set_global_handle_scope(handle_scope);
+        return handle_scope;
+    )
+    return nullptr;
 }
 
-void close_handle_scope(napi_env env, napi_handle_scope scope) {
-    auto status = napi_close_handle_scope(env, scope);
-    NAPI_THROW_IF_FAILED_VOID(env, status);
-    set_global_handle_scope(nullptr);
+void close_handle_scope(JlnodeResult *_result, napi_env env, napi_handle_scope scope) {
+    WRAP_ERROR(
+        auto status = napi_close_handle_scope(env, scope);
+        NAPI_THROW_IF_FAILED_VOID(env, status);
+        set_global_handle_scope(nullptr);
+    )
 }
 
 napi_value dereference(JlnodeResult *_result, napi_env env, napi_ref ref) {

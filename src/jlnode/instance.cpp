@@ -85,10 +85,11 @@ int Instance::Initialize(const char *addon_path) {
         return 1;
     }
     set_global_env((void *) t->ToBigInt(context).ToLocalChecked()->Uint64Value());
-    set_global_handle_scope(open_handle_scope(get_global_env()));
+    auto result = JlnodeResult::Ok();
+    set_global_handle_scope(open_handle_scope(&result, get_global_env()));
 
     initialized = true;
-    return 0;
+    return result.code;
 }
 
 int Instance::Dispose() {
@@ -109,7 +110,8 @@ int Instance::Dispose() {
         } while (more);
     }
 
-    close_handle_scope(get_global_env(), get_global_handle_scope());
+    auto result = JlnodeResult::Ok();
+    close_handle_scope(&result, get_global_env(), get_global_handle_scope());
     set_global_env(nullptr);
 
     auto exit_code = node::EmitExit(environment->env.get());
