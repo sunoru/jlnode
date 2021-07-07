@@ -78,7 +78,7 @@ jobs:
         run: npm ci
       - name: Build libjlnode & jlnode_addon.node
         run: |
-          npm run install -- --CDCMAKE_INSTALL_PREFIX=${prefix}
+          npm run compile -- --CDCMAKE_INSTALL_PREFIX=${prefix}
           cmake --install ./build
 
       - name: Tar files
