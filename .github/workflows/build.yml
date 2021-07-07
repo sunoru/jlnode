@@ -22,7 +22,8 @@ jobs:
       - name: Prepare environment
         shell: bash
         run: |
-          echo "prefix=${HOME}/installed/jlnode" >> $GITHUB_ENV
+          prefix=${HOME}/installed/jlnode
+          echo "prefix=${prefix}" >> $GITHUB_ENV
           echo "${prefix}/bin" >> $GITHUB_PATH
           echo "PACKAGE_VERSION=`node -p \"require('./package.json').version\"`" >> $GITHUB_ENV
 
