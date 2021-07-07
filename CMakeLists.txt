@@ -16,6 +16,12 @@ if(NOT NAPI_INC)
         COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/node/out/${CMAKE_BUILD_TYPE}/node -p "require('path').resolve(require('node-addon-api').include_dir)"
         OUTPUT_VARIABLE NAPI_INC
     )
+    if (NOT NAPI_INC)
+        execute_process(
+            COMMAND node -p "require('path').resolve(require('node-addon-api').include_dir)"
+            OUTPUT_VARIABLE NAPI_INC
+        )
+    endif()
 endif()
 message(STATUS "NAPI_INC: ${NAPI_INC}")
 
