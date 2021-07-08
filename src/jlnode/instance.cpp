@@ -4,7 +4,8 @@ using v8::V8;
 
 std::string get_initialization_scripts(const char *addon_path) {
     return "globalThis.require = require('module').createRequire(process.cwd() + '/')\n"
-           "return globalThis.require('" + std::string(addon_path) + "').initialize()";
+           "globalThis.__jlnode_addon = globalThis.require('" + std::string(addon_path) + "')\n"
+           "return globalThis.__jlnode_addon.initialize()";
 }
 
 namespace jlnode {
