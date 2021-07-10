@@ -22,8 +22,8 @@ extern "C" {
 extern jl_module_t *jl_base_module;
 
 extern jl_value_t *jl_call1(jl_function_t *f, jl_value_t *a);
-
 extern jl_value_t *jl_call2(jl_function_t *f, jl_value_t *a, jl_value_t *b);
+extern jl_value_t *jl_call3(jl_function_t *f, jl_value_t *a, jl_value_t *b, jl_value_t *c);
 
 extern jl_value_t *jl_eval_string(const char *str);
 
