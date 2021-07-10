@@ -43,20 +43,19 @@ find_library(NODEJS_LIBRARY
     PATHS ${CMAKE_CURRENT_SOURCE_DIR}/node/out/${CMAKE_BUILD_TYPE}
     REQUIRED)
 
-find_package(Julia REQUIRED)
-
 set(source_path "${CMAKE_CURRENT_SOURCE_DIR}/src/jlnode")
 
 set(sources
     ${source_path}/module.cpp
-#    ${source_path}/utils.cpp
+    ${source_path}/utils.cpp
     ${source_path}/instance.cpp
-#    ${source_path}/objects.cpp
+    ${source_path}/objects.cpp
 )
 set(headers
-#    ${source_path}/utils.h
+    ${source_path}/utils.h
+    ${source_path}/jlsyms.h
     ${source_path}/instance.h
-#    ${source_path}/objects.h
+    ${source_path}/objects.h
 )
 
 add_library(${PROJECT_NAME}
@@ -66,7 +65,6 @@ add_library(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME}
     ${CMAKE_JS_LIB}
     ${NODEJS_LIBRARY})
-#    ${Julia_LIBRARY})
 
 target_include_directories(${PROJECT_NAME}
     PRIVATE
@@ -74,7 +72,6 @@ target_include_directories(${PROJECT_NAME}
     ${CMAKE_CURRENT_SOURCE_DIR}/node/deps/v8/include
     ${CMAKE_CURRENT_SOURCE_DIR}/node/deps/uv/include
     ${CMAKE_JS_INC}
-    ${Julia_INCLUDE_DIRS}
     ${NAPI_INC})
 
 project(jlnode_addon
