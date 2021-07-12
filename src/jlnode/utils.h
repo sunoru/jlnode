@@ -13,13 +13,15 @@ extern jl_function_t *get_func;
 extern jl_function_t *setindex_func;
 extern jl_function_t *haskey_func;
 extern jl_function_t *keys_func;
+extern jl_function_t *propertynames_func;
+extern jl_function_t *getproperty_func;
+extern jl_function_t *setproperty_func;
 
 int initialize_utils(jl_module_t *module);
 
 jl_value_t *to_jl_value(napi_value node_value);
 
 napi_value to_napi_value(jl_value_t *jl_value);
-
 
 }
 
@@ -30,28 +32,18 @@ napi_value to_napi_value(jl_value_t *jl_value);
         e.ThrowAsJavaScriptException(); \
         return napi_pending_exception;  \
     } catch (std::exception &e) {       \
-        auto napi_err = Napi::Error::New(env, e.what()); \
+        auto napi_err = Napi::Error::New(_env, e.what()); \
         napi_err.ThrowAsJavaScriptException(); \
         return napi_pending_exception;  \
     }                        \
 } while (0)
 
-#define NODE_CALLBACK(NAME, ARGC, DEFAULT_VALUE, ...) napi_value NAME( \
-    napi_env _env, napi_callback_info info              \
-) {                                                     \
-    Napi::Env env(_env);                                \
-    size_t argc = ARGC;                                 \
-    napi_value argv[ARGC];                              \
-    napi_value this_arg;                                \
-    void *data;                                         \
-    auto status = napi_get_cb_info(                     \
-        env, info, &argc, argv, &this_arg, &data        \
-    );                                                  \
-    if (status != napi_ok) {                            \
-        Napi::Error::New(env).ThrowAsJavaScriptException(); \
-        return DEFAULT_VALUE;                           \
-    }                                                   \
-    __VA_ARGS__                                         \
-}
+#define GET_FUNC_POINTER(NAME, FUNC_NAME, FAILED_VALUE) \
+    do {                                  \
+        (NAME) = jl_eval_string(FUNC_NAME);  \
+        if ((NAME) == jl_nothing) {         \
+            return FAILED_VALUE;                     \
+        }                                 \
+    } while(0)
 
 #endif //JLNODE_ADDON_UTILS_H

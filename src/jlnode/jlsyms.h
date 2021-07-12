@@ -1,6 +1,7 @@
 #ifndef JLNODE_ADDON_JLSYMS_H
 #define JLNODE_ADDON_JLSYMS_H
 
+#include <cassert>
 #include <csetjmp>
 #include <ucontext.h>
 #include <uv.h>
@@ -9,15 +10,140 @@
 typedef void jl_module_t;
 typedef struct _jl_value_t jl_value_t;
 typedef jl_value_t jl_function_t;
-
-namespace jlnode {
-
-}
+#define STORE_ARRAY_LEN
+#define JL_DATA_TYPE
+#define STATIC_INLINE static inline
 
 // Copied from julia.h
 // Keeping only necessary symbols here.
-
 extern "C" {
+typedef struct _jl_sym_t {
+    JL_DATA_TYPE
+    struct _jl_sym_t *left;
+    struct _jl_sym_t *right;
+    uintptr_t hash;
+} jl_sym_t;
+
+extern const char *jl_symbol_name(jl_sym_t *s);
+
+typedef struct {
+    JL_DATA_TYPE
+    size_t length;
+} jl_svec_t;
+
+typedef struct {
+    /*
+      how - allocation style
+      0 = data is inlined, or a foreign pointer we don't manage
+      1 = julia-allocated buffer that needs to be marked
+      2 = malloc-allocated pointer this array object manages
+      3 = has a pointer to the object that owns the data
+    */
+    uint16_t how: 2;
+    uint16_t ndims: 9;
+    uint16_t pooled: 1;
+    uint16_t ptrarray: 1; // representation is pointer array
+    uint16_t hasptr: 1; // representation has embedded pointers
+    uint16_t isshared: 1; // data is shared by multiple Arrays
+    uint16_t isaligned: 1; // data allocated with memalign
+} jl_array_flags_t;
+
+typedef struct {
+    JL_DATA_TYPE
+    void *data;
+#ifdef STORE_ARRAY_LEN
+    size_t length;
+#endif
+    jl_array_flags_t flags;
+    uint16_t elsize;  // element size including alignment (dim 1 memory stride)
+    uint32_t offset;  // for 1-d only. does not need to get big.
+    size_t nrows;
+    union {
+        // 1d
+        size_t maxsize;
+        // Nd
+        size_t ncols;
+    };
+    // other dim sizes go here for ndims > 2
+
+    // followed by alignment padding and inline data, or owner pointer
+} jl_array_t;
+
+typedef struct {
+    JL_DATA_TYPE
+    jl_sym_t *name;
+    struct _jl_module_t *module;
+    jl_svec_t *names;  // field names
+    // `wrapper` is either the only instantiation of the type (if no parameters)
+    // or a UnionAll accepting parameters to make an instantiation.
+    jl_value_t *wrapper;
+    jl_svec_t *cache;        // sorted array
+    jl_svec_t *linearcache;  // unsorted array
+    intptr_t hash;
+    struct _jl_methtable_t *mt;
+    jl_array_t *partial;     // incomplete instantiations of this type
+} jl_typename_t;
+
+typedef struct {
+    uint32_t nfields;
+    uint32_t npointers; // number of pointers embedded inside
+    int32_t first_ptr; // index of the first pointer (or -1)
+    uint16_t alignment; // strictest alignment over all fields
+    uint16_t haspadding: 1; // has internal undefined bytes
+    uint16_t fielddesc_type: 2; // 0 -> 8, 1 -> 16, 2 -> 32
+    // union {
+    //     jl_fielddesc8_t field8[nfields];
+    //     jl_fielddesc16_t field16[nfields];
+    //     jl_fielddesc32_t field32[nfields];
+    // };
+    // union { // offsets relative to data start in words
+    //     uint8_t ptr8[npointers];
+    //     uint16_t ptr16[npointers];
+    //     uint32_t ptr32[npointers];
+    // };
+} jl_datatype_layout_t;
+
+typedef struct _jl_datatype_t {
+    JL_DATA_TYPE
+    jl_typename_t *name;
+    struct _jl_datatype_t *super;
+    jl_svec_t *parameters;
+    jl_svec_t *types;
+    jl_svec_t *names;
+    jl_value_t *instance;  // for singletons
+    const jl_datatype_layout_t *layout;
+    int32_t size; // TODO: move to _jl_datatype_layout_t
+    int32_t ninitialized;
+    uint32_t hash;
+    uint8_t abstract;
+    uint8_t mutabl;
+    // memoized properties
+    uint8_t hasfreetypevars; // majority part of isconcrete computation
+    uint8_t isconcretetype; // whether this type can have instances
+    uint8_t isdispatchtuple; // aka isleaftupletype
+    uint8_t isbitstype; // relevant query for C-api and type-parameters
+    uint8_t zeroinit; // if one or more fields requires zero-initialization
+    uint8_t isinlinealloc; // if this is allocated inline
+    uint8_t has_concrete_subtype; // If clear, no value will have this datatype
+} jl_datatype_t;
+
+extern jl_value_t *jl_nothing;
+
+extern jl_datatype_t *jl_simplevector_type;
+
+extern jl_value_t *jl_typeof(jl_value_t *v);
+
+#define jl_svec_len(t)              (((jl_svec_t*)(t))->length)
+#define jl_svec_set_len_unsafe(t, n) (((jl_svec_t*)(t))->length=(n))
+#define jl_svec_data(t) ((jl_value_t**)((char*)(t) + sizeof(jl_svec_t)))
+
+#define jl_typeis(v, t) (jl_typeof(v)==(jl_value_t*)(t))
+
+STATIC_INLINE jl_value_t *jl_svecref(void *t, size_t i) {
+    assert(jl_typeis((jl_value_t *) t, jl_simplevector_type));
+    assert(i < jl_svec_len(t));
+    return jl_svec_data(t)[i];
+}
 
 extern jl_module_t *jl_base_module;
 
@@ -25,6 +151,7 @@ extern jl_value_t *jl_call1(jl_function_t *f, jl_value_t *a);
 extern jl_value_t *jl_call2(jl_function_t *f, jl_value_t *a, jl_value_t *b);
 extern jl_value_t *jl_call3(jl_function_t *f, jl_value_t *a, jl_value_t *b, jl_value_t *c);
 
+extern jl_value_t *jl_cstr_to_string(const char *str);
 extern jl_value_t *jl_eval_string(const char *str);
 
 extern jl_value_t *jl_get_nth_field(jl_value_t *v, size_t i);
@@ -35,7 +162,12 @@ jl_value_t *jl_box_voidpointer(void *x);
 void *jl_unbox_voidpointer(jl_value_t *v);
 uint64_t jl_unbox_uint64(jl_value_t *v);
 
-extern jl_value_t *jl_nothing;
+STATIC_INLINE jl_svec_t *jl_field_names(jl_datatype_t *st) {
+    jl_svec_t *names = st->names;
+    if (!names)
+        names = st->name->names;
+    return names;
+}
 
 // gc -------------------------------------------------------------------------
 
