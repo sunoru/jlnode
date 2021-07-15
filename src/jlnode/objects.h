@@ -102,7 +102,7 @@ template<typename Finalizer>
 void add_finalizer(napi_env env, napi_value v, Finalizer finalizeCallback, void *data, void *finalizeHint) {
     auto finalizeData =
         new FinalizeData<Finalizer>({std::move(finalizeCallback), finalizeHint});
-    auto status = napi_add_finalizer(env, v, data, FinalizeData<Finalizer>::Wrapper, finalizeHint, nullptr);
+    auto status = napi_add_finalizer(env, v, data, FinalizeData<Finalizer>::Wrapper, finalizeData, nullptr);
     if (status != napi_ok) {
         delete finalizeData;
         NAPI_THROW_IF_FAILED_VOID(env, status);
