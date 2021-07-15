@@ -16,6 +16,8 @@ extern jl_function_t *keys_func;
 extern jl_function_t *propertynames_func;
 extern jl_function_t *getproperty_func;
 extern jl_function_t *setproperty_func;
+extern jl_function_t *external_finalize_func;
+extern jl_function_t *object_finalize_func;
 
 int initialize_utils(jl_module_t *module);
 
@@ -39,11 +41,13 @@ napi_value to_napi_value(jl_value_t *jl_value);
 } while (0)
 
 #define GET_FUNC_POINTER(NAME, FUNC_NAME, FAILED_VALUE) \
-    do {                                  \
-        (NAME) = jl_eval_string(FUNC_NAME);  \
-        if ((NAME) == jl_nothing) {         \
-            return FAILED_VALUE;                     \
-        }                                 \
+    do {                                                \
+        if ((NAME) == nullptr) {                        \
+            (NAME) = jl_eval_string(FUNC_NAME);         \
+            if ((NAME) == jl_nothing) {                 \
+                return FAILED_VALUE;                    \
+            }                                           \
+        }                                               \
     } while(0)
 
 #endif //JLNODE_ADDON_UTILS_H

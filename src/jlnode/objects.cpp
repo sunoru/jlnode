@@ -68,47 +68,16 @@ napi_status create_object_dict(napi_env _env, jl_value_t *dict, napi_value *ret)
     return napi_ok;
 }
 
-
-//
-//NODE_CALLBACK(mutable_setter,
-//2,
-//Napi::Boolean::New(env,
-//false), {
-//auto dict = (jl_value_t *) data;
-//if (argc != 2) {
-//return env.
-//
-//Undefined();
-//
-//}
-//auto cl = Napi::Function(env, env.RunScript("console.log"));
-//cl.Call(2, argv);
-//auto key = jlnode::to_jl_value(argv[0]);
-//auto value = jlnode::to_jl_value(argv[1]);
-//if (jlnode::setproperty_func == nullptr) {
-//GET_FUNC_POINTER(
-//    jlnode::setproperty_func,
-//    "import NodeCall.jlnode_setproperty!;NodeCall.jlnode_setproperty!",
-//    env.Undefined()
-//);
-//}
-//auto ret = jl_call3(jlnode::setindex_func, dict, key, value);
-//return
-//jlnode::to_napi_value(ret);
-//})
-
 Napi::Value mutable_getter(const std::string &name, const Napi::CallbackInfo &info) {
     auto env = info.Env();
     if (info.Length() != 0) {
         return env.Undefined();
     }
-    if (jlnode::getproperty_func == nullptr) {
-        GET_FUNC_POINTER(
-            jlnode::getproperty_func,
-            "import NodeCall.jlnode_getproperty;NodeCall.jlnode_getproperty",
-            env.Undefined()
-        );
-    }
+    GET_FUNC_POINTER(
+        jlnode::getproperty_func,
+        "import NodeCall.jlnode_getproperty;NodeCall.jlnode_getproperty",
+        env.Undefined()
+    );
     auto v = (jl_value_t *) info.Data();
     auto key = jl_cstr_to_string(name.c_str());
     auto ret = jl_call2(jlnode::getproperty_func, v, key);
@@ -120,13 +89,11 @@ Napi::Value mutable_setter(const std::string &name, const Napi::CallbackInfo &in
     if (info.Length() != 1) {
         return env.Undefined();
     }
-    if (jlnode::setproperty_func == nullptr) {
-        GET_FUNC_POINTER(
-            jlnode::setproperty_func,
-            "import NodeCall.jlnode_setproperty!;NodeCall.jlnode_setproperty!",
-            env.Undefined()
-        );
-    }
+    GET_FUNC_POINTER(
+        jlnode::setproperty_func,
+        "import NodeCall.jlnode_setproperty!;NodeCall.jlnode_setproperty!",
+        env.Undefined()
+    );
     auto v = (jl_value_t *) info.Data();
     auto key = jl_cstr_to_string(name.c_str());
     auto value = jlnode::to_jl_value(info[0]);
@@ -161,3 +128,21 @@ napi_status create_object_mutable(napi_env _env, jl_value_t *v, napi_value *ret)
     );
     return napi_ok;
 }
+
+void object_finalize(Napi::Env env, void *data, void *func) {
+    GET_FUNC_POINTER(
+        jlnode::object_finalize_func,
+        "import NodeCall.object_finalize;NodeCall.object_finalize",
+    );
+    auto data_ptr = jl_box_voidpointer(data);
+    auto f_ptr = jl_box_voidpointer(func);
+    jl_call2(jlnode::external_finalize_func, f_ptr, data_ptr);
+}
+
+napi_status add_finalizer(napi_env _env, napi_value v, void *func, void *data) {
+    WRAP_ERROR(
+        jlnode::add_finalizer(_env, v, object_finalize, data, func);
+    );
+    return napi_ok;
+}
+

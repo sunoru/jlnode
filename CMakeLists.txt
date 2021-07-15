@@ -50,12 +50,14 @@ set(sources
     ${source_path}/module.cpp
     ${source_path}/utils.cpp
     ${source_path}/instance.cpp
+    ${source_path}/external.cpp
     ${source_path}/objects.cpp
 )
 set(headers
     ${source_path}/utils.h
     ${source_path}/jlsyms.h
     ${source_path}/instance.h
+    ${source_path}/external.h
     ${source_path}/objects.h
 )
 
