@@ -17,6 +17,7 @@ typedef jl_value_t jl_function_t;
 // Copied from julia.h
 // Keeping only necessary symbols here.
 extern "C" {
+
 typedef struct _jl_sym_t {
     JL_DATA_TYPE
     struct _jl_sym_t *left;
@@ -24,7 +25,7 @@ typedef struct _jl_sym_t {
     uintptr_t hash;
 } jl_sym_t;
 
-extern const char *jl_symbol_name(jl_sym_t *s);
+const char *jl_symbol_name(jl_sym_t *s);
 
 typedef struct {
     JL_DATA_TYPE
@@ -131,7 +132,7 @@ extern jl_value_t *jl_nothing;
 
 extern jl_datatype_t *jl_simplevector_type;
 
-extern jl_value_t *jl_typeof(jl_value_t *v);
+jl_value_t *jl_typeof(jl_value_t *v);
 
 #define jl_svec_len(t)              (((jl_svec_t*)(t))->length)
 #define jl_svec_set_len_unsafe(t, n) (((jl_svec_t*)(t))->length=(n))
@@ -147,18 +148,21 @@ STATIC_INLINE jl_value_t *jl_svecref(void *t, size_t i) {
 
 extern jl_module_t *jl_base_module;
 
-extern jl_value_t *jl_call1(jl_function_t *f, jl_value_t *a);
-extern jl_value_t *jl_call2(jl_function_t *f, jl_value_t *a, jl_value_t *b);
-extern jl_value_t *jl_call3(jl_function_t *f, jl_value_t *a, jl_value_t *b, jl_value_t *c);
 
-extern jl_value_t *jl_cstr_to_string(const char *str);
-extern jl_value_t *jl_eval_string(const char *str);
+jl_value_t *jl_call(jl_function_t *f, jl_value_t **args, int32_t nargs);
+jl_value_t *jl_call1(jl_function_t *f, jl_value_t *a);
+jl_value_t *jl_call2(jl_function_t *f, jl_value_t *a, jl_value_t *b);
+jl_value_t *jl_call3(jl_function_t *f, jl_value_t *a, jl_value_t *b, jl_value_t *c);
 
-extern jl_value_t *jl_get_nth_field(jl_value_t *v, size_t i);
+jl_value_t *jl_cstr_to_string(const char *str);
+jl_value_t *jl_eval_string(const char *str);
 
-extern void jl_set_nth_field(jl_value_t *v, size_t i, jl_value_t *rhs);
+jl_value_t *jl_get_nth_field(jl_value_t *v, size_t i);
+
+void jl_set_nth_field(jl_value_t *v, size_t i, jl_value_t *rhs);
 
 jl_value_t *jl_box_voidpointer(void *x);
+jl_value_t *jl_box_uint64(uint64_t x);
 void *jl_unbox_voidpointer(jl_value_t *v);
 uint64_t jl_unbox_uint64(jl_value_t *v);
 
@@ -353,7 +357,7 @@ struct _jl_tls_states_t {
 };
 typedef struct _jl_tls_states_t jl_tls_states_t;
 typedef jl_tls_states_t *jl_ptls_t;
-extern const jl_ptls_t jl_get_ptls_states(void);
+const jl_ptls_t jl_get_ptls_states(void);
 #define jl_pgcstack (jl_get_ptls_states()->pgcstack)
 #define JL_GC_ENCODE_PUSH(n)       ((((size_t)(n))<<2)|1)
 

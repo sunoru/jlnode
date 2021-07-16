@@ -12,6 +12,7 @@ jl_function_t *jlnode::getproperty_func = nullptr;
 jl_function_t *jlnode::setproperty_func = nullptr;
 jl_function_t *jlnode::external_finalize_func = nullptr;
 jl_function_t *jlnode::object_finalize_func = nullptr;
+jl_function_t *jlnode::call_function_func = nullptr;
 
 int jlnode::initialize_utils(jl_module_t *module) {
     nodecall_module = module;

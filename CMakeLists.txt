@@ -52,6 +52,7 @@ set(sources
     ${source_path}/instance.cpp
     ${source_path}/external.cpp
     ${source_path}/objects.cpp
+    ${source_path}/functions.cpp
 )
 set(headers
     ${source_path}/utils.h
@@ -59,6 +60,7 @@ set(headers
     ${source_path}/instance.h
     ${source_path}/external.h
     ${source_path}/objects.h
+    ${source_path}/functions.h
 )
 
 add_library(${PROJECT_NAME}

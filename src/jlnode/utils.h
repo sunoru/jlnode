@@ -18,6 +18,7 @@ extern jl_function_t *getproperty_func;
 extern jl_function_t *setproperty_func;
 extern jl_function_t *external_finalize_func;
 extern jl_function_t *object_finalize_func;
+extern jl_function_t *call_function_func;
 
 int initialize_utils(jl_module_t *module);
 
