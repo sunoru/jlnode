@@ -1,6 +1,7 @@
 #ifndef JLNODE_ADDON_UTILS_H
 #define JLNODE_ADDON_UTILS_H
 
+#include <node.h>
 #include <napi.h>
 #include "jlsyms.h"
 
@@ -25,6 +26,16 @@ int initialize_utils(jl_module_t *module);
 jl_value_t *to_jl_value(napi_value node_value);
 
 napi_value to_napi_value(jl_value_t *jl_value);
+
+inline napi_value JsValueFromV8LocalValue(v8::Local<v8::Value> local) {
+    return reinterpret_cast<napi_value>(*local);
+}
+
+inline v8::Local<v8::Value> V8LocalValueFromJsValue(napi_value v) {
+    v8::Local<v8::Value> local;
+    memcpy(static_cast<void *>(&local), &v, sizeof(v));
+    return local;
+}
 
 }
 

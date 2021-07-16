@@ -53,6 +53,7 @@ set(sources
     ${source_path}/external.cpp
     ${source_path}/objects.cpp
     ${source_path}/functions.cpp
+    ${source_path}/promises.cpp
 )
 set(headers
     ${source_path}/utils.h
@@ -61,6 +62,7 @@ set(headers
     ${source_path}/external.h
     ${source_path}/objects.h
     ${source_path}/functions.h
+    ${source_path}/promises.h
 )
 
 add_library(${PROJECT_NAME}

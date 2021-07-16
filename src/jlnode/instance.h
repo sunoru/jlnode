@@ -39,7 +39,7 @@ public:
 
 class Instance {
 public:
-    uv_loop_t event_loop;
+    uv_loop_t *event_loop;
     std::unique_ptr<node::MultiIsolatePlatform> platform;
     std::shared_ptr<node::ArrayBufferAllocator> allocator;
     v8::Isolate *isolate;
@@ -49,7 +49,8 @@ public:
 
     Instance();
 
-    int Initialize(const char *addon_path, napi_env *env);
+//    int Initialize(const char *addon_path, napi_env *env);
+    int Initialize(const char *addon_path, napi_env *env, const char **args, size_t argc);
 
     int Dispose();
 

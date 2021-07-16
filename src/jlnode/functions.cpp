@@ -34,8 +34,3 @@ napi_status create_function(napi_env _env, void *func, const char *utf8name, nap
     );
     return napi_ok;
 }
-
-// jl_args[0] = 
-// jl_args[1] = 
-// jl_args[2] = 
-// jl_args[3] = 

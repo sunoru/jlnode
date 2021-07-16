@@ -33,12 +33,16 @@ Environment::Environment(
 
 Instance::Instance() = default;
 
-int Instance::Initialize(const char *addon_path, napi_env *env) {
+int Instance::Initialize(const char *addon_path, napi_env *env, const char **_args, size_t argc) {
     char pt[256];
     uv_get_process_title(pt, 256);
     std::vector<std::string> args{std::string(pt)};
     std::vector<std::string> exec_args;
     std::vector<std::string> errors;
+    args.reserve(argc + 1);
+    for (auto i = 0; i < argc; ++i) {
+        args.emplace_back(_args[i]);
+    }
     auto exit_code = node::InitializeNodeWithArgs(&args, &exec_args, &errors);
     for (const std::string &error : errors)
         fprintf(stderr, "%s: %s\n", args[0].c_str(), error.c_str());
@@ -48,7 +52,9 @@ int Instance::Initialize(const char *addon_path, napi_env *env) {
     platform = node::MultiIsolatePlatform::Create(1);
     v8::V8::InitializePlatform(platform.get());
     v8::V8::Initialize();
-    auto ret = uv_loop_init(&event_loop);
+
+    event_loop = new uv_loop_t;
+    auto ret = uv_loop_init(event_loop);
     if (ret != 0) {
         fprintf(stderr, "%s: Failed to initialize loop: %s\n",
                 pt, uv_err_name(ret));
@@ -56,13 +62,13 @@ int Instance::Initialize(const char *addon_path, napi_env *env) {
     }
 
     allocator = node::ArrayBufferAllocator::Create();
-    isolate = node::NewIsolate(allocator, &event_loop, platform.get());
+    isolate = node::NewIsolate(allocator, event_loop, platform.get());
     if (isolate == nullptr) {
         fprintf(stderr, "%s: Failed to initialize V8 Isolate\n", pt);
         return 1;
     }
 
-    config = new Config(isolate, &event_loop, platform.get(), allocator.get());
+    config = new Config(isolate, event_loop, platform.get(), allocator.get());
 
     context = node::NewContext(isolate);
     if (context.IsEmpty()) {
@@ -100,12 +106,12 @@ int Instance::Dispose() {
         v8::SealHandleScope seal(isolate);
         bool more;
         do {
-            uv_run(&event_loop, UV_RUN_DEFAULT);
+            uv_run(event_loop, UV_RUN_DEFAULT);
             platform->DrainTasks(isolate);
-            more = uv_loop_alive(&event_loop);
+            more = uv_loop_alive(event_loop);
             if (more) continue;
             node::EmitBeforeExit(environment->env.get());
-            more = uv_loop_alive(&event_loop);
+            more = uv_loop_alive(event_loop);
         } while (more);
     }
 
@@ -121,9 +127,10 @@ int Instance::Dispose() {
     platform->UnregisterIsolate(isolate);
     isolate->Dispose();
     while (!platform_finished)
-        uv_run(&event_loop, UV_RUN_ONCE);
-    auto err = uv_loop_close(&event_loop);
+        uv_run(event_loop, UV_RUN_ONCE);
+    auto err = uv_loop_close(event_loop);
     assert(err == 0);
+    delete event_loop;
 
     V8::Dispose();
     V8::ShutdownPlatform();
