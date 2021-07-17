@@ -3,7 +3,6 @@
 
 #include <cassert>
 #include <csetjmp>
-#include <ucontext.h>
 #include <uv.h>
 #include <napi.h>
 
@@ -149,22 +148,22 @@ STATIC_INLINE jl_value_t *jl_svecref(void *t, size_t i) {
 extern jl_module_t *jl_base_module;
 
 
-jl_value_t *jl_call(jl_function_t *f, jl_value_t **args, int32_t nargs);
-jl_value_t *jl_call1(jl_function_t *f, jl_value_t *a);
-jl_value_t *jl_call2(jl_function_t *f, jl_value_t *a, jl_value_t *b);
-jl_value_t *jl_call3(jl_function_t *f, jl_value_t *a, jl_value_t *b, jl_value_t *c);
+extern jl_value_t *jl_call(jl_function_t *f, jl_value_t **args, int32_t nargs);
+extern jl_value_t *jl_call1(jl_function_t *f, jl_value_t *a);
+extern jl_value_t *jl_call2(jl_function_t *f, jl_value_t *a, jl_value_t *b);
+extern jl_value_t *jl_call3(jl_function_t *f, jl_value_t *a, jl_value_t *b, jl_value_t *c);
 
-jl_value_t *jl_cstr_to_string(const char *str);
-jl_value_t *jl_eval_string(const char *str);
+extern jl_value_t *jl_cstr_to_string(const char *str);
+extern jl_value_t *jl_eval_string(const char *str);
 
-jl_value_t *jl_get_nth_field(jl_value_t *v, size_t i);
+extern jl_value_t *jl_get_nth_field(jl_value_t *v, size_t i);
 
-void jl_set_nth_field(jl_value_t *v, size_t i, jl_value_t *rhs);
+extern void jl_set_nth_field(jl_value_t *v, size_t i, jl_value_t *rhs);
 
-jl_value_t *jl_box_voidpointer(void *x);
-jl_value_t *jl_box_uint64(uint64_t x);
-void *jl_unbox_voidpointer(jl_value_t *v);
-uint64_t jl_unbox_uint64(jl_value_t *v);
+extern jl_value_t *jl_box_voidpointer(void *x);
+extern jl_value_t *jl_box_uint64(uint64_t x);
+extern void *jl_unbox_voidpointer(jl_value_t *v);
+extern uint64_t jl_unbox_uint64(jl_value_t *v);
 
 STATIC_INLINE jl_svec_t *jl_field_names(jl_datatype_t *st) {
     jl_svec_t *names = st->names;
@@ -357,7 +356,7 @@ struct _jl_tls_states_t {
 };
 typedef struct _jl_tls_states_t jl_tls_states_t;
 typedef jl_tls_states_t *jl_ptls_t;
-const jl_ptls_t jl_get_ptls_states(void);
+extern const jl_ptls_t jl_get_ptls_states(void);
 #define jl_pgcstack (jl_get_ptls_states()->pgcstack)
 #define JL_GC_ENCODE_PUSH(n)       ((((size_t)(n))<<2)|1)
 
