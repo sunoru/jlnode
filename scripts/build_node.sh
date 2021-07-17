@@ -2,5 +2,6 @@
 set -ex
 
 cd `dirname $(realpath $0)`/../node
-./configure --shared --without-inspector
+patch ./src/inspector_agent.cc < ../patches/inspector_agent.cc.patch
+./configure --shared
 make -j{nrpoc}

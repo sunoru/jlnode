@@ -1,8 +1,7 @@
 name: Build & Release
 
 on:
-  push:
-    branches:
+  push: branches:
       - main
   pull_request:
     branches:
@@ -37,7 +36,9 @@ jobs:
 
       - name: Checkout submodules
         if: steps.libnode-cache.outputs.cache-hit != 'true'
-        run: git submodule update --init --recursive
+        run: |
+          git submodule update --init --recursive
+          patch ./node/src/inspector_agent.cc < ./patches/inspector_agent.cc.patch
       - name: Windows prerequisites
         if: runner.os == 'Windows'
         run: choco install nasm
@@ -45,7 +46,7 @@ jobs:
         if: steps.libnode-cache.outputs.cache-hit != 'true' && runner.os != 'Windows'
         working-directory: ./node
         run: |
-          ./configure --prefix=${prefix} --shared --without-inspector
+          ./configure --prefix=${prefix} --shared
           make -j`nproc`
       - name: Build NodeJS as shared library - Windows
         if: steps.libnode-cache.outputs.cache-hit != 'true' && runner.os == 'Windows'
