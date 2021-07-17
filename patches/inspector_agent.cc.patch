@@ -1,0 +1,14 @@
+diff --git a/src/inspector_agent.cc b/src/inspector_agent.cc
+index 81dece656f..8743509bcf 100644
+--- a/src/inspector_agent.cc
++++ b/src/inspector_agent.cc
+@@ -108,7 +108,8 @@ static int StartDebugSignalHandler() {
+   // Omitted on FreeBSD because it doesn't seem to like small stacks.
+   const size_t stack_size = std::max(static_cast<size_t>(4 * 8192),
+                                      static_cast<size_t>(PTHREAD_STACK_MIN));
+-  CHECK_EQ(0, pthread_attr_setstacksize(&attr, stack_size));
++  // "Invalid argument" raised by this
++  //  CHECK_EQ(0, pthread_attr_setstacksize(&attr, stack_size));
+ #endif  // defined(PTHREAD_STACK_MIN) && !defined(__FreeBSD__)
+   CHECK_EQ(0, pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED));
+   sigset_t sigmask;
