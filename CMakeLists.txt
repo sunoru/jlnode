@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.1)
 
 project(jlnode
-    VERSION 14.17.1
+    VERSION 14.17.3
     LANGUAGES CXX)
 
 set(CMAKE_MACOSX_RPATH 1)
@@ -13,36 +13,13 @@ add_definitions(-DNAPI_VERSION=8)
 add_definitions(-DNODE_ADDON_API_DISABLE_DEPRECATED=1)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
-
 if(NOT NAPI_INC)
     execute_process(
-        COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/node/out/${CMAKE_BUILD_TYPE}/node -p "require('path').resolve(require('node-addon-api').include_dir)"
+        COMMAND ${NODE_PATH}node -p "require('path').resolve(require('node-addon-api').include_dir)"
         OUTPUT_VARIABLE NAPI_INC
     )
-    if (NOT NAPI_INC)
-        execute_process(
-            COMMAND node -p "require('path').resolve(require('node-addon-api').include_dir)"
-            OUTPUT_VARIABLE NAPI_INC
-        )
-    endif()
 endif()
 message(STATUS "NAPI_INC: ${NAPI_INC}")
-
-file(READ ${CMAKE_JS_INC}/node_version.h NODEJS_VERSION_FILE)
-
-string(REGEX MATCH "#define NODE_MODULE_VERSION ([0-9]+)" NODEJS_MODULE_VERSION_DEF ${NODEJS_VERSION_FILE})
-string(REGEX MATCH "([0-9]+)$" NODEJS_MODULE_VERSION ${NODEJS_MODULE_VERSION_DEF})
-
-set(NODEJS_LIBRARY_NAMES
-    libnode.so.${NODEJS_MODULE_VERSION}
-    libnode.${NODEJS_MODULE_VERSION}.dylib
-    libnode.${NODEJS_MODULE_VERSION}.dll
-    node.lib)
-
-find_library(NODEJS_LIBRARY
-    NAMES ${NODEJS_LIBRARY_NAMES}
-    PATHS ${CMAKE_CURRENT_SOURCE_DIR}/node/out/${CMAKE_BUILD_TYPE}
-    REQUIRED)
 
 set(source_path "${CMAKE_CURRENT_SOURCE_DIR}/src/jlnode")
 
@@ -70,19 +47,15 @@ add_library(${PROJECT_NAME}
     ${CMAKE_JS_SRC})
 
 target_link_libraries(${PROJECT_NAME}
-    ${CMAKE_JS_LIB}
-    ${NODEJS_LIBRARY})
+    ${CMAKE_JS_LIB})
 
 target_include_directories(${PROJECT_NAME}
     PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/node/src
-    ${CMAKE_CURRENT_SOURCE_DIR}/node/deps/v8/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/node/deps/uv/include
     ${CMAKE_JS_INC}
     ${NAPI_INC})
 
 project(jlnode_addon
-    VERSION 14.17.1
+    VERSION 14.17.3
     LANGUAGES CXX)
 
 set(addon_path "${CMAKE_CURRENT_SOURCE_DIR}/src/addon")
@@ -104,11 +77,9 @@ target_include_directories(${PROJECT_NAME}
     ${NAPI_INC})
 
 target_link_libraries(${PROJECT_NAME}
-    ${CMAKE_JS_LIB}
-    ${NODEJS_LIBRARY})
+    ${CMAKE_JS_LIB})
 
 install(TARGETS jlnode jlnode_addon
     LIBRARY DESTINATION lib
     ARCHIVE DESTINATION lib
     RUNTIME DESTINATION lib)
-
