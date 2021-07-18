@@ -39,6 +39,7 @@ find_library(NODEJS_LIBRARY
 
 message(STATUS "NODEJS_LIBRARY: ${NODEJS_LIBRARY}")
 
+if(FIND_JULIA)
 set(JULIA_LIBRARY_NAMES
     libjulia.so
     libjulia.dylib
@@ -47,8 +48,9 @@ set(JULIA_LIBRARY_NAMES
 
 find_library(JULIA_LIBRARY
     NAMES ${JULIA_LIBRARY_NAMES}
-    PATHS ENV LD_LIBRARY_PATH
-    REQUIRED)
+    PATHS ENV LD_LIBRARY_PATH)
+else()
+endif()
 
 message(STATUS "JULIA_LIBRARY: ${JULIA_LIBRARY}")
 
