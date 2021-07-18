@@ -21,6 +21,37 @@ if(NOT NAPI_INC)
 endif()
 message(STATUS "NAPI_INC: ${NAPI_INC}")
 
+file(READ ${CMAKE_JS_INC}/node_version.h NODEJS_VERSION_FILE)
+
+string(REGEX MATCH "#define NODE_MODULE_VERSION ([0-9]+)" NODEJS_MODULE_VERSION_DEF ${NODEJS_VERSION_FILE})
+string(REGEX MATCH "([0-9]+)$" NODEJS_MODULE_VERSION ${NODEJS_MODULE_VERSION_DEF})
+
+set(NODEJS_LIBRARY_NAMES
+    libnode.so.${NODEJS_MODULE_VERSION}
+    libnode.${NODEJS_MODULE_VERSION}.dylib
+    libnode.${NODEJS_MODULE_VERSION}.dll
+    node.lib)
+
+find_library(NODEJS_LIBRARY
+    NAMES ${NODEJS_LIBRARY_NAMES}
+    PATHS ENV LD_LIBRARY_PATH
+    REQUIRED)
+
+message(STATUS "NODEJS_LIBRARY: ${NODEJS_LIBRARY}")
+
+set(JULIA_LIBRARY_NAMES
+    libjulia.so
+    libjulia.dylib
+    libjulia.dll
+    libjulia.lib)
+
+find_library(JULIA_LIBRARY
+    NAMES ${JULIA_LIBRARY_NAMES}
+    PATHS ENV LD_LIBRARY_PATH
+    REQUIRED)
+
+message(STATUS "JULIA_LIBRARY: ${JULIA_LIBRARY}")
+
 set(source_path "${CMAKE_CURRENT_SOURCE_DIR}/src/jlnode")
 
 set(sources
@@ -47,7 +78,9 @@ add_library(${PROJECT_NAME}
     ${CMAKE_JS_SRC})
 
 target_link_libraries(${PROJECT_NAME}
-    ${CMAKE_JS_LIB})
+    ${CMAKE_JS_LIB}
+    ${NODEJS_LIBRARY}
+    ${JULIA_LIBRARY})
 
 target_include_directories(${PROJECT_NAME}
     PRIVATE
