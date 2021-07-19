@@ -112,7 +112,8 @@ target_include_directories(${PROJECT_NAME}
     ${NAPI_INC})
 
 target_link_libraries(${PROJECT_NAME}
-    ${CMAKE_JS_LIB})
+    ${CMAKE_JS_LIB}
+    ${NODEJS_LIBRARY})
 
 install(TARGETS jlnode jlnode_addon
     LIBRARY DESTINATION lib
