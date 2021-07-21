@@ -8,7 +8,10 @@ Napi::Value dict_getter(const Napi::CallbackInfo &info) {
     auto dict = (jl_value_t *) info.Data();
     auto key = jlnode::to_jl_value(info[0]);
     auto ret = jl_call3(jlnode::get_func, dict, key, jl_nothing);
-    return {env, jlnode::to_napi_value(ret)};
+    JL_GC_PUSH1(ret);
+    auto result = Napi::Value(env, jlnode::to_napi_value(ret));
+    JL_GC_POP();
+    return result;
 }
 
 Napi::Value dict_setter(const Napi::CallbackInfo &info) {
@@ -23,7 +26,10 @@ Napi::Value dict_setter(const Napi::CallbackInfo &info) {
         jlnode::setindex_func = jl_eval_string("import NodeCall.jlnode_setindex!;NodeCall.jlnode_setindex!");
     }
     auto ret = jl_call3(jlnode::setindex_func, dict, value, key);
-    return {env, jlnode::to_napi_value(ret)};
+    JL_GC_PUSH1(ret);
+    auto result = Napi::Value(env, jlnode::to_napi_value(ret));
+    JL_GC_POP();
+    return result;
 }
 
 Napi::Value dict_haskey(const Napi::CallbackInfo &info) {
@@ -37,7 +43,10 @@ Napi::Value dict_haskey(const Napi::CallbackInfo &info) {
         jlnode::setindex_func = jl_eval_string("import NodeCall.jlnode_setindex!;NodeCall.jlnode_setindex!");
     }
     auto ret = jl_call2(jlnode::haskey_func, dict, key);
-    return {env, jlnode::to_napi_value(ret)};
+    JL_GC_PUSH1(ret);
+    auto result = Napi::Value(env, jlnode::to_napi_value(ret));
+    JL_GC_POP();
+    return result;
 }
 
 Napi::Value dict_keys(const Napi::CallbackInfo &info) {
@@ -47,7 +56,10 @@ Napi::Value dict_keys(const Napi::CallbackInfo &info) {
     }
     auto dict = (jl_value_t *) info.Data();
     auto ret = jl_call1(jlnode::keys_func, dict);
-    return {env, jlnode::to_napi_value(ret)};
+    JL_GC_PUSH1(ret);
+    auto result = Napi::Value(env, jlnode::to_napi_value(ret));
+    JL_GC_POP();
+    return result;
 }
 
 napi_status create_object_dict(napi_env _env, jl_value_t *dict, napi_value *ret) {
@@ -81,7 +93,10 @@ Napi::Value mutable_getter(const std::string &name, const Napi::CallbackInfo &in
     auto v = (jl_value_t *) info.Data();
     auto key = jl_cstr_to_string(name.c_str());
     auto ret = jl_call2(jlnode::getproperty_func, v, key);
-    return {env, jlnode::to_napi_value(ret)};
+    JL_GC_PUSH1(ret);
+    auto result = Napi::Value(env, jlnode::to_napi_value(ret));
+    JL_GC_POP();
+    return result;
 }
 
 Napi::Value mutable_setter(const std::string &name, const Napi::CallbackInfo &info) {
@@ -98,7 +113,10 @@ Napi::Value mutable_setter(const std::string &name, const Napi::CallbackInfo &in
     auto key = jl_cstr_to_string(name.c_str());
     auto value = jlnode::to_jl_value(info[0]);
     auto ret = jl_call3(jlnode::setproperty_func, v, key, value);
-    return {env, jlnode::to_napi_value(ret)};
+    JL_GC_PUSH1(ret);
+    auto result = Napi::Value(env, jlnode::to_napi_value(ret));
+    JL_GC_POP();
+    return result;
 }
 
 napi_status create_object_mutable(napi_env _env, jl_value_t *v, napi_value *ret) {

@@ -8,8 +8,6 @@ jlnode::Instance *instance;
 
 extern "C" {
 
-int test() { return 20070128; }
-
 int initialize(
     jl_module_t *module,
     const char *addon_path,
