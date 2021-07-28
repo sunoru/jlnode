@@ -33,7 +33,12 @@ int dispose() {
 }
 
 int node_uv_run(uv_loop_t *loop, uv_run_mode mode) {
-    return uv_run(loop, mode);
+    auto ret = uv_run(loop, mode);
+    if (ret == 0) {
+        instance->platform->DrainTasks(instance->isolate);
+        ret = uv_run(loop, mode);
+    }
+    return ret;
 }
 
 }
