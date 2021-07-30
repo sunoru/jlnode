@@ -22,9 +22,11 @@ Napi::Value dict_setter(const Napi::CallbackInfo &info) {
     auto dict = (jl_value_t *) info.Data();
     auto key = jlnode::to_jl_value(info[0]);
     auto value = jlnode::to_jl_value(info[1]);
-    if (jlnode::setindex_func == nullptr) {
-        jlnode::setindex_func = jl_eval_string("import NodeCall.jlnode_setindex!;NodeCall.jlnode_setindex!");
-    }
+    GET_FUNC_POINTER(
+        jlnode::setindex_func,
+        "import NodeCall.jlnode_setindex!;NodeCall.jlnode_setindex!",
+        env.Undefined()
+    );
     auto ret = jl_call3(jlnode::setindex_func, dict, value, key);
     JL_GC_PUSH1(&ret);
     auto result = Napi::Value(env, jlnode::to_napi_value(ret));
@@ -39,9 +41,6 @@ Napi::Value dict_haskey(const Napi::CallbackInfo &info) {
     }
     auto dict = (jl_value_t *) info.Data();
     auto key = jlnode::to_jl_value(info[0]);
-    if (jlnode::setindex_func == nullptr) {
-        jlnode::setindex_func = jl_eval_string("import NodeCall.jlnode_setindex!;NodeCall.jlnode_setindex!");
-    }
     auto ret = jl_call2(jlnode::haskey_func, dict, key);
     JL_GC_PUSH1(&ret);
     auto result = Napi::Value(env, jlnode::to_napi_value(ret));
