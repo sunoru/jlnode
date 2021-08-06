@@ -6,8 +6,6 @@
 
 extern "C" {
 
-void external_finalize(Napi::Env env, void *data);
-
 napi_status create_external(napi_env env, void *data, napi_value *result);
 
 }

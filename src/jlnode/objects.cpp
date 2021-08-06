@@ -99,19 +99,19 @@ napi_status create_object_mutable(napi_env _env, jl_value_t *v, napi_value *ret)
 }
 
 
-void object_finalize(Napi::Env env, void *data, void *func) {
+void object_finalizer(Napi::Env env, void *data, void *func) {
     GET_FUNC_POINTER(
-        jlnode::object_finalize_func,
+        jlnode::object_finalizer_func,
         "import NodeCall.object_finalizer;NodeCall.object_finalizer",
     );
     auto data_ptr = jl_box_voidpointer(data);
     auto f_ptr = jl_box_voidpointer(func);
-    jl_call2(jlnode::object_finalize_func, f_ptr, data_ptr);
+    jl_call2(jlnode::object_finalizer_func, f_ptr, data_ptr);
 }
 
 napi_status add_finalizer(napi_env _env, napi_value v, void *func, void *data) {
     WRAP_ERROR(
-        jlnode::add_finalizer(_env, v, object_finalize, data, func);
+        jlnode::add_finalizer(_env, v, object_finalizer, data, func);
     );
     return napi_ok;
 }

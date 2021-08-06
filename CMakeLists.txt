@@ -62,6 +62,7 @@ set(sources
     ${source_path}/instance.cpp
     ${source_path}/external.cpp
     ${source_path}/objects.cpp
+    ${source_path}/arrays.cpp
     ${source_path}/functions.cpp
     ${source_path}/promises.cpp
 )
@@ -71,6 +72,7 @@ set(headers
     ${source_path}/instance.h
     ${source_path}/external.h
     ${source_path}/objects.h
+    ${source_path}/arrays.h
     ${source_path}/functions.h
     ${source_path}/promises.h
 )
