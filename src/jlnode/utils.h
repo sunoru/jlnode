@@ -10,13 +10,10 @@ namespace jlnode {
 extern jl_module_t *nodecall_module;
 extern jl_function_t *to_napi_value_func;
 extern jl_function_t *to_jl_value_func;
-extern jl_function_t *get_func;
-extern jl_function_t *setindex_func;
-extern jl_function_t *haskey_func;
-extern jl_function_t *keys_func;
 extern jl_function_t *propertynames_func;
 extern jl_function_t *getproperty_func;
 extern jl_function_t *setproperty_func;
+extern jl_function_t *hasproperty_func;
 extern jl_function_t *external_finalize_func;
 extern jl_function_t *object_finalize_func;
 extern jl_function_t *call_function_func;
@@ -35,6 +32,13 @@ inline v8::Local<v8::Value> V8LocalValueFromJsValue(napi_value v) {
     v8::Local<v8::Value> local;
     memcpy(static_cast<void *>(&local), &v, sizeof(v));
     return local;
+}
+
+inline void check_jl_exception(Napi::Env env) {
+    auto err = jl_exception_occurred();
+    if (err != nullptr) {
+        throw Napi::Error::New(env, jl_typeof_str(err));
+    }
 }
 
 }
