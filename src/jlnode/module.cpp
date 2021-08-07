@@ -13,13 +13,11 @@ int initialize(
     const char *addon_path,
     const char **args,
     size_t argc,
-    napi_env *env,
-    uv_loop_t **loop
+    napi_env *env
 ) {
     instance = new jlnode::Instance;
     auto ret = instance->Initialize(addon_path, env, args, argc);
     if (ret != 0) { return ret; }
-    *loop = instance->event_loop;
     return jlnode::initialize_utils(module);
 }
 

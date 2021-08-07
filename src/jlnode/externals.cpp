@@ -1,4 +1,4 @@
-#include "external.h"
+#include "externals.h"
 
 void external_finalizer(Napi::Env env, void *data) {
     GET_FUNC_POINTER(

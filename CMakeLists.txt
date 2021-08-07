@@ -60,7 +60,7 @@ set(sources
     ${source_path}/module.cpp
     ${source_path}/utils.cpp
     ${source_path}/instance.cpp
-    ${source_path}/external.cpp
+    ${source_path}/externals.cpp
     ${source_path}/objects.cpp
     ${source_path}/arrays.cpp
     ${source_path}/functions.cpp
@@ -70,7 +70,7 @@ set(headers
     ${source_path}/utils.h
     ${source_path}/jlsyms.h
     ${source_path}/instance.h
-    ${source_path}/external.h
+    ${source_path}/externals.h
     ${source_path}/objects.h
     ${source_path}/arrays.h
     ${source_path}/functions.h
