@@ -131,7 +131,10 @@ int Instance::Dispose() {
     while (!platform_finished)
         uv_run(event_loop, UV_RUN_ONCE);
     auto err = uv_loop_close(event_loop);
-    assert(err == 0);
+    if (err != 0) {
+        fprintf(stderr, "uv_loop_close: %s\n", uv_err_name(err));
+        return err;
+    }
     delete event_loop;
 
     V8::Dispose();

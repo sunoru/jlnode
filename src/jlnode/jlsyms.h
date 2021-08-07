@@ -175,6 +175,8 @@ STATIC_INLINE jl_svec_t *jl_field_names(jl_datatype_t *st) {
 extern const char *jl_typeof_str(jl_value_t *v);
 extern jl_value_t *jl_exception_occurred(void);
 
+extern void jl_yield(void);
+
 // gc -------------------------------------------------------------------------
 
 typedef struct _jl_gcframe_t {
