@@ -7,10 +7,14 @@
 
 jlnode::Instance *instance;
 static bool initialized = false;
-static uv_idle_t jl_yield_idler;
+static uv_timer_t *jl_yield_timer;
 
-void _jl_yield(uv_idle_t *_) {
+void _jl_yield(uv_timer_t *_) {
     jl_yield();
+}
+
+void _jl_yield_close(uv_handle_t *timer) {
+    delete (uv_timer_t *) timer;
 }
 
 extern "C" {
@@ -26,8 +30,9 @@ int start_node(
 }
 
 int initialize(uv_loop_t *loop, jl_module_t *module) {
-    uv_idle_init(loop, &jl_yield_idler);
-    uv_idle_start(&jl_yield_idler, _jl_yield);
+    jl_yield_timer = new uv_timer_t;
+    uv_timer_init(loop, jl_yield_timer);
+    uv_timer_start(jl_yield_timer, _jl_yield, 0, 1);
     auto ret = jlnode::initialize_utils(module);
     if (ret == 0) {
         initialized = true;
@@ -37,9 +42,9 @@ int initialize(uv_loop_t *loop, jl_module_t *module) {
 
 int dispose() {
     if (initialized) {
-        uv_idle_stop(&jl_yield_idler);
-        uv_close((uv_handle_t *) &jl_yield_idler, nullptr);
         initialized = false;
+        uv_timer_stop(jl_yield_timer);
+        uv_close((uv_handle_t *) jl_yield_timer, _jl_yield_close);
     }
     if (instance == nullptr) {
         return 0;
