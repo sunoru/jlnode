@@ -18,8 +18,8 @@ extern jl_function_t *external_finalizer_func;
 extern jl_function_t *object_finalizer_func;
 extern jl_function_t *arraybuffer_finalizer_func;
 extern jl_function_t *call_function_func;
-extern jl_function_t *reference_func;
-extern jl_function_t *dereference_func;
+extern jl_function_t *get_reference_func;
+extern jl_function_t *push_func;
 
 int initialize_utils(jl_module_t *module);
 
@@ -27,9 +27,7 @@ jl_value_t *to_jl_value(napi_value node_value);
 
 napi_value to_napi_value(jl_value_t *jl_value);
 
-void *reference(jl_value_t *jl_value);
-
-jl_value_t *dereference(void *ptr);
+jl_value_t *get_reference(void *ptr);
 
 inline napi_value JsValueFromV8LocalValue(v8::Local<v8::Value> local) {
     return reinterpret_cast<napi_value>(*local);
