@@ -12,26 +12,22 @@ std::string get_initialization_scripts(const char *addon_path) {
 
 namespace jlnode {
 
-Config::Config(
-    v8::Isolate *isolate,
-    uv_loop_t *loop,
+EnvironmentConfig::EnvironmentConfig(
     node::MultiIsolatePlatform *platform,
-    node::ArrayBufferAllocator *allocator
-) : locker(isolate), isolate_scope(isolate), isolate_data(
-    node::CreateIsolateData(isolate, loop, platform, allocator),
-    node::FreeIsolateData
-), handle_scope(isolate) {}
+    std::vector<std::string> *errors,
+    const std::vector<std::string> &args,
+    const std::vector<std::string> &exec_args
+) {
+    setup = node::CommonEnvironmentSetup::Create(platform, errors, args, exec_args);
+}
 
+IsolateConfig::IsolateConfig(
+    v8::Isolate *isolate
+) : locker(isolate), isolate_scope(isolate), handle_scope(isolate) {}
 
-Environment::Environment(
-    Config &config,
-    v8::Local<v8::Context> context,
-    std::vector<std::string> &args,
-    std::vector<std::string> &exec_args
-) : context_scope(context), env(
-    node::CreateEnvironment(config.isolate_data.get(), context, args, exec_args),
-    node::FreeEnvironment
-) {}
+ContextConfig::ContextConfig(
+    v8::Local<v8::Context> context
+) : context_scope(context) {}
 
 Instance::Instance() = default;
 
@@ -52,35 +48,25 @@ int Instance::Initialize(const char *addon_path, napi_env *env, const char **_ar
         return exit_code;
     }
     platform = node::MultiIsolatePlatform::Create(1);
-    v8::V8::InitializePlatform(platform.get());
-    v8::V8::Initialize();
+    V8::InitializePlatform(platform.get());
+    V8::Initialize();
 
-    event_loop = new uv_loop_t;
-    auto ret = uv_loop_init(event_loop);
-    if (ret != 0) {
-        fprintf(stderr, "%s: Failed to initialize loop: %s\n",
-                pt, uv_err_name(ret));
-        return ret;
-    }
-
-    allocator = node::ArrayBufferAllocator::Create();
-    isolate = node::NewIsolate(allocator, event_loop, platform.get());
-    if (isolate == nullptr) {
-        fprintf(stderr, "%s: Failed to initialize V8 Isolate\n", pt);
+    environment_config = new EnvironmentConfig(platform.get(), &errors, args, exec_args);
+    auto setup = environment_config->setup.get();
+    if (!setup) {
+        for (const std::string &error : errors)
+            fprintf(stderr, "%s: %s\n", args[0].c_str(), error.c_str());
         return 1;
     }
+    auto isolate = setup->isolate();
+    isolate_config = new IsolateConfig(isolate);
+    auto environment = setup->env();
+    auto context = setup->context();
+    context_config = new ContextConfig(context);
 
-    config = new Config(isolate, event_loop, platform.get(), allocator.get());
-
-    context = node::NewContext(isolate);
-    if (context.IsEmpty()) {
-        fprintf(stderr, "%s: Failed to initialize V8 Context\n", pt);
-        return 1;
-    }
-    environment = new Environment(*config, context, args, exec_args);
     auto init_scripts = get_initialization_scripts(addon_path);
     auto load_env_ret = node::LoadEnvironment(
-        environment->env.get(),
+        environment,
         init_scripts.c_str()
     );
     if (load_env_ret.IsEmpty()) {
@@ -99,44 +85,17 @@ int Instance::Initialize(const char *addon_path, napi_env *env, const char **_ar
     return 0;
 }
 
-int Instance::Dispose() {
+int Instance::Dispose() const {
     if (!initialized) {
         return 0;
     }
-
-    {
-        v8::SealHandleScope seal(isolate);
-        bool more;
-        do {
-            uv_run(event_loop, UV_RUN_DEFAULT);
-            platform->DrainTasks(isolate);
-            more = uv_loop_alive(event_loop);
-            if (more) continue;
-            node::EmitBeforeExit(environment->env.get());
-            more = uv_loop_alive(event_loop);
-        } while (more);
-    }
-
-    auto exit_code = node::EmitExit(environment->env.get());
-    node::Stop(environment->env.get());
-
-    delete environment;
-    delete config;
-    auto platform_finished = false;
-    platform->AddIsolateFinishedCallback(isolate, [](void *data) {
-        *static_cast<bool *>(data) = true;
-    }, &platform_finished);
-    platform->UnregisterIsolate(isolate);
-    isolate->Dispose();
-    while (!platform_finished)
-        uv_run(event_loop, UV_RUN_ONCE);
-    auto err = uv_loop_close(event_loop);
-    if (err != 0) {
-        fprintf(stderr, "uv_loop_close: %s\n", uv_err_name(err));
-        return err;
-    }
-    delete event_loop;
-
+    auto setup = environment_config->setup.get();
+    auto environment = setup->env();
+    auto exit_code = node::SpinEventLoop(environment).FromMaybe(1);
+    node::Stop(environment);
+    delete context_config;
+    delete isolate_config;
+    delete environment_config;
     V8::Dispose();
     V8::ShutdownPlatform();
     return exit_code;

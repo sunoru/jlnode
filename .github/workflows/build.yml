@@ -22,7 +22,7 @@ jobs:
       - name: Checkout Julia
         uses: julia-actions/setup-julia@v1
         with:
-          version: '1.6'
+          version: '1.7'
       - name: Prepare Julia dependencies
         run: |
           NODE_PATH=`julia -e 'using Pkg;Pkg.add("libnode_jll");using libnode_jll;println(libnode_jll.artifact_dir)'`

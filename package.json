@@ -1,6 +1,6 @@
 {
   "name": "jlnode",
-  "version": "14.17.3",
+  "version": "16.14.0",
   "description": "",
   "main": "./build/lib/jlnode_addon.node",
   "scripts": {
@@ -18,7 +18,7 @@
   },
   "homepage": "https://github.com/sunoru/jlnode#readme",
   "dependencies": {
-    "cmake-js": "^6.1.0",
+    "cmake-js": "^6.3.0",
     "node-addon-api": "^4.0.0"
   }
 }

@@ -9,50 +9,50 @@
 
 namespace jlnode {
 
-struct Config {
+struct EnvironmentConfig {
 public:
-    v8::Locker locker;
-    v8::Isolate::Scope isolate_scope;
-    std::unique_ptr<node::IsolateData, decltype(&node::FreeIsolateData)> isolate_data;
-    v8::HandleScope handle_scope;
+    std::unique_ptr<node::CommonEnvironmentSetup> setup;
 
-    Config(
-        v8::Isolate *isolate,
-        uv_loop_t *loop,
+    EnvironmentConfig(
         node::MultiIsolatePlatform *platform,
-        node::ArrayBufferAllocator *allocator
+        std::vector<std::string> *errors,
+        const std::vector<std::string> &args,
+        const std::vector<std::string> &exec_args
     );
 };
 
-struct Environment {
+struct IsolateConfig {
+public:
+    v8::Locker locker;
+    v8::Isolate::Scope isolate_scope;
+    v8::HandleScope handle_scope;
+
+    IsolateConfig(
+        v8::Isolate *isolate
+    );
+};
+
+struct ContextConfig {
 public:
     v8::Context::Scope context_scope;
-    std::unique_ptr<node::Environment, decltype(&node::FreeEnvironment)> env;
 
-    Environment(
-        Config &config,
-        v8::Local<v8::Context> context,
-        std::vector<std::string> &args,
-        std::vector<std::string> &exec_args
+    ContextConfig(
+        v8::Local<v8::Context> context
     );
 };
 
 class Instance {
 public:
-    uv_loop_t *event_loop;
     std::unique_ptr<node::MultiIsolatePlatform> platform;
-    std::shared_ptr<node::ArrayBufferAllocator> allocator;
-    v8::Isolate *isolate;
-    Config *config;
-    v8::Local<v8::Context> context;
-    Environment *environment;
+    IsolateConfig *isolate_config = nullptr;
+    ContextConfig *context_config = nullptr;
+    EnvironmentConfig *environment_config = nullptr;
 
     Instance();
 
-//    int Initialize(const char *addon_path, napi_env *env);
     int Initialize(const char *addon_path, napi_env *env, const char **args, size_t argc);
 
-    int Dispose();
+    int Dispose() const;
 
 private:
     bool initialized = false;
