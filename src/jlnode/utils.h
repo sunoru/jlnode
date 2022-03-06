@@ -1,5 +1,5 @@
-#ifndef JLNODE_ADDON_UTILS_H
-#define JLNODE_ADDON_UTILS_H
+#ifndef JLNODE_UTILS_H
+#define JLNODE_UTILS_H
 
 #include <node.h>
 #include <napi.h>
@@ -18,6 +18,7 @@ extern jl_function_t *external_finalizer_func;
 extern jl_function_t *object_finalizer_func;
 extern jl_function_t *arraybuffer_finalizer_func;
 extern jl_function_t *call_function_func;
+extern jl_function_t *get_reference_value_func;
 
 int initialize_utils(jl_module_t *module);
 
@@ -35,9 +36,12 @@ inline v8::Local<v8::Value> V8LocalValueFromJsValue(napi_value v) {
     return local;
 }
 
-inline void check_jl_exception(Napi::Env env) {
+inline void check_jl_exception(Napi::Env env, int gc_depth) {
     auto err = jl_exception_occurred();
     if (err != nullptr) {
+        for (auto i = 0; i < gc_depth; ++i) {
+            JL_GC_POP();
+        }
         throw Napi::Error::New(env, jl_typeof_str(err));
     }
 }
@@ -60,11 +64,11 @@ inline void check_jl_exception(Napi::Env env) {
 #define GET_FUNC_POINTER(NAME, FUNC_NAME, FAILED_VALUE) \
     do {                                                \
         if ((NAME) == nullptr) {                        \
-            (NAME) = jl_eval_string(FUNC_NAME);         \
+            (NAME) = jl_get_function(jlnode::nodecall_module, FUNC_NAME);         \
             if (jl_exception_occurred() || (NAME) == jl_nothing) { \
                 return FAILED_VALUE;                    \
             }                                           \
         }                                               \
     } while(0)
 
-#endif //JLNODE_ADDON_UTILS_H
+#endif //JLNODE_UTILS_H

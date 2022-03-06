@@ -1,5 +1,5 @@
-#ifndef JLNODE_ADDON_JLSYMS_H
-#define JLNODE_ADDON_JLSYMS_H
+#ifndef JLNODE_JLSYMS_H
+#define JLNODE_JLSYMS_H
 
 #include <cassert>
 #include <csetjmp>
@@ -146,6 +146,14 @@ STATIC_INLINE jl_value_t *jl_svecref(void *t, size_t i) {
 }
 
 extern jl_module_t *jl_base_module;
+
+
+extern jl_value_t *jl_get_global(jl_module_t *m, jl_sym_t *var);
+extern jl_sym_t *jl_symbol(const char *str);
+STATIC_INLINE jl_function_t *jl_get_function(jl_module_t *m, const char *name)
+{
+    return (jl_function_t*)jl_get_global(m, jl_symbol(name));
+}
 
 
 extern jl_value_t *jl_call(jl_function_t *f, jl_value_t **args, int32_t nargs);
@@ -373,4 +381,4 @@ extern const jl_ptls_t jl_get_ptls_states(void);
 
 }
 
-#endif //JLNODE_ADDON_JLSYMS_H
+#endif //JLNODE_JLSYMS_H

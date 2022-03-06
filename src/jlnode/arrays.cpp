@@ -3,10 +3,12 @@
 void arraybuffer_finalizer(Napi::Env env, void *data) {
     GET_FUNC_POINTER(
         jlnode::arraybuffer_finalizer_func,
-        "import NodeCall.arraybuffer_finalizer;NodeCall.arraybuffer_finalizer",
+        "arraybuffer_finalizer",
     );
     auto ptr = jl_box_voidpointer(data);
+    JL_GC_PUSH1(&ptr);
     jl_call1(jlnode::arraybuffer_finalizer_func, ptr);
+    JL_GC_POP();
 }
 
 napi_status create_external_arraybuffer(napi_env _env, void *data, size_t byte_length, napi_value *ret) {

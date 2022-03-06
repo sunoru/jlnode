@@ -1,5 +1,5 @@
-#ifndef JLNODE_INIT_H
-#define JLNODE_INIT_H
+#ifndef JLNODE_ADDON_INIT_H
+#define JLNODE_ADDON_INIT_H
 
 #include <cassert>
 #include <napi.h>
@@ -10,4 +10,4 @@ Napi::BigInt Initialize(const Napi::CallbackInfo &info);
 
 }
 
-#endif //JLNODE_INIT_H
+#endif //JLNODE_ADDON_INIT_H

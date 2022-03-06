@@ -1,5 +1,5 @@
-#ifndef JLNODE_ADDON_OBJECTS_H
-#define JLNODE_ADDON_OBJECTS_H
+#ifndef JLNODE_OBJECTS_H
+#define JLNODE_OBJECTS_H
 
 #include <string>
 #include <vector>
@@ -10,7 +10,7 @@
 
 extern "C" {
 
-napi_status create_object_mutable(napi_env env, jl_value_t *v, napi_value *ret);
+napi_status create_object_mutable(napi_env env, void *v, napi_value *ret);
 
 napi_status add_finalizer(napi_env env, napi_value v, void *func, void *data);
 
@@ -45,4 +45,4 @@ void add_finalizer(napi_env env, napi_value v, Finalizer finalizeCallback, void 
 
 }
 
-#endif //JLNODE_ADDON_OBJECTS_H
+#endif //JLNODE_OBJECTS_H

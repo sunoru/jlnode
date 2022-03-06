@@ -1,5 +1,5 @@
-#ifndef JLNODE_ADDON_PROMISES_H
-#define JLNODE_ADDON_PROMISES_H
+#ifndef JLNODE_PROMISES_H
+#define JLNODE_PROMISES_H
 
 #include <node.h>
 #include <napi.h>
@@ -18,4 +18,4 @@ napi_status get_promise_state(napi_env env, napi_value _promise, promise_state *
 }
 
 
-#endif //JLNODE_ADDON_PROMISES_H
+#endif //JLNODE_PROMISES_H

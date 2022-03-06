@@ -1,5 +1,5 @@
-#ifndef JLNODE_ADDON_ARRAYS_H
-#define JLNODE_ADDON_ARRAYS_H
+#ifndef JLNODE_ARRAYS_H
+#define JLNODE_ARRAYS_H
 
 #include <napi.h>
 #include "utils.h"
@@ -10,4 +10,4 @@ napi_status create_external_arraybuffer(napi_env env, void *data, size_t byte_le
 
 }
 
-#endif //JLNODE_ADDON_ARRAYS_H
+#endif //JLNODE_ARRAYS_H

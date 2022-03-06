@@ -4,7 +4,7 @@ Napi::Value call_function(const Napi::CallbackInfo &info) {
     auto env = info.Env();
     GET_FUNC_POINTER(
         jlnode::call_function_func,
-        "import NodeCall.call_function;NodeCall.call_function",
+        "call_function",
         env.Undefined()
     );
 
