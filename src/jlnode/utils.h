@@ -8,8 +8,6 @@
 namespace jlnode {
 
 extern jl_module_t *nodecall_module;
-extern jl_function_t *to_napi_value_func;
-extern jl_function_t *to_jl_value_func;
 extern jl_function_t *propertynames_func;
 extern jl_function_t *getproperty_func;
 extern jl_function_t *setproperty_func;
@@ -18,7 +16,6 @@ extern jl_function_t *external_finalizer_func;
 extern jl_function_t *object_finalizer_func;
 extern jl_function_t *arraybuffer_finalizer_func;
 extern jl_function_t *call_function_func;
-extern jl_function_t *get_reference_value_func;
 
 int initialize_utils(jl_module_t *module);
 

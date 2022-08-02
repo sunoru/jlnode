@@ -1,9 +1,12 @@
 *.swp
 build/
 cmake-build*/
+/cmake
 /installed
 
 .idea/
 node_modules/
 
 /tmp/
+
+.vscode/

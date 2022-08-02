@@ -41,7 +41,7 @@ dispose() = @ccall :libjlnode.dispose()::Cint
 
 function run(scripts::AbstractString)
     result = Ref{NapiValue}()
-    result = @ccall :libjlnode.run_script(err::Ptr{JlnodeResult}, Env[]::NapiValue, scripts::Cstring)::NapiValue
+    result = @ccall :libjlnode.node_eval(err::Ptr{JlnodeResult}, Env[]::NapiValue, scripts::Cstring)::NapiValue
     if err[].code == 1 || err[].code == 2
         @error unsafe_string(err[].message)
     else

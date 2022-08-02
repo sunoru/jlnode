@@ -378,6 +378,8 @@ extern const jl_ptls_t jl_get_ptls_states(void);
   jl_pgcstack = (jl_gcframe_t*)__gc_stkf;
 
 #define JL_GC_POP() (jl_pgcstack = jl_pgcstack->prev)
+extern int jl_gc_enable(int on);
+extern int jl_gc_is_enabled(void);
 
 }
 
