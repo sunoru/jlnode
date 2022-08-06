@@ -1,6 +1,6 @@
 {
   "name": "jlnode",
-  "version": "16.14.0",
+  "version": "16.0.0",
   "description": "",
   "main": "./build/lib/jlnode_addon.node",
   "scripts": {
