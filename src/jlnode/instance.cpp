@@ -47,7 +47,8 @@ int Instance::Initialize(const char *addon_path, napi_env *env, const char **_ar
     if (exit_code != 0) {
         return exit_code;
     }
-    platform = node::MultiIsolatePlatform::Create(1);
+    auto thread_pool_size = std::getenv("UV_THREADPOOL_SIZE");
+    platform = node::MultiIsolatePlatform::Create(thread_pool_size == nullptr ? 4 : atoi(thread_pool_size));
     V8::InitializePlatform(platform.get());
     V8::Initialize();
 

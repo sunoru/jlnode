@@ -1,6 +1,7 @@
 #ifndef JLNODE_INSTANCE_H
 #define JLNODE_INSTANCE_H
 
+#include <cstdlib>
 #include <string>
 
 #include <node.h>
