@@ -9,6 +9,7 @@ jl_function_t *jlnode::external_finalizer_func = nullptr;
 jl_function_t *jlnode::object_finalizer_func = nullptr;
 jl_function_t *jlnode::arraybuffer_finalizer_func = nullptr;
 jl_function_t *jlnode::call_function_func = nullptr;
+jl_function_t *jlnode::call_threadsafe_func = nullptr;
 
 int jlnode::initialize_utils(jl_module_t *module) {
     nodecall_module = module;

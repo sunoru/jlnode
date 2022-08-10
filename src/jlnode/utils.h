@@ -16,6 +16,7 @@ extern jl_function_t *external_finalizer_func;
 extern jl_function_t *object_finalizer_func;
 extern jl_function_t *arraybuffer_finalizer_func;
 extern jl_function_t *call_function_func;
+extern jl_function_t *call_threadsafe_func;
 
 int initialize_utils(jl_module_t *module);
 

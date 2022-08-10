@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.1)
 
 project(jlnode
-    VERSION 16.14.0
+    VERSION 16.1.0
     LANGUAGES CXX)
 
 set(CMAKE_MACOSX_RPATH 1)
@@ -65,6 +65,7 @@ set(sources
     ${source_path}/arrays.cpp
     ${source_path}/functions.cpp
     ${source_path}/promises.cpp
+    ${source_path}/threading.cpp
 )
 set(headers
     ${source_path}/utils.h
@@ -75,6 +76,7 @@ set(headers
     ${source_path}/arrays.h
     ${source_path}/functions.h
     ${source_path}/promises.h
+    ${source_path}/threading.h
 )
 
 add_library(${PROJECT_NAME}
@@ -92,7 +94,7 @@ target_include_directories(${PROJECT_NAME}
     ${NAPI_INC})
 
 project(jlnode_addon
-    VERSION 16.13.1
+    VERSION 16.1.0
     LANGUAGES CXX)
 
 set(addon_path "${CMAKE_CURRENT_SOURCE_DIR}/src/addon")

@@ -1,4 +1,5 @@
 #include "instance.h"
+#include "threading.h"
 
 using v8::V8;
 
@@ -81,6 +82,10 @@ int Instance::Initialize(const char *addon_path, napi_env *env, const char **_ar
         return 1;
     }
     *env = (napi_env) t->ToBigInt(context).ToLocalChecked()->Uint64Value();
+    auto ret = jlnode::initialize_threading(*env);
+    if (ret != 0) {
+        return ret;
+    }
 
     initialized = true;
     return 0;
@@ -92,6 +97,7 @@ int Instance::Dispose() const {
     }
     auto setup = environment_config->setup.get();
     auto environment = setup->env();
+    jlnode::dispose_threading();
     auto exit_code = node::SpinEventLoop(environment).FromMaybe(1);
     node::Stop(environment);
     delete context_config;

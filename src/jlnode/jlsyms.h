@@ -157,6 +157,7 @@ STATIC_INLINE jl_function_t *jl_get_function(jl_module_t *m, const char *name)
 
 
 extern jl_value_t *jl_call(jl_function_t *f, jl_value_t **args, int32_t nargs);
+extern jl_value_t *jl_call0(jl_function_t *f);
 extern jl_value_t *jl_call1(jl_function_t *f, jl_value_t *a);
 extern jl_value_t *jl_call2(jl_function_t *f, jl_value_t *a, jl_value_t *b);
 extern jl_value_t *jl_call3(jl_function_t *f, jl_value_t *a, jl_value_t *b, jl_value_t *c);
@@ -172,6 +173,7 @@ extern jl_value_t *jl_box_voidpointer(void *x);
 extern jl_value_t *jl_box_uint64(uint64_t x);
 extern void *jl_unbox_voidpointer(jl_value_t *v);
 extern uint64_t jl_unbox_uint64(jl_value_t *v);
+extern int32_t jl_unbox_int32(jl_value_t *v);
 
 STATIC_INLINE jl_svec_t *jl_field_names(jl_datatype_t *st) {
     jl_svec_t *names = st->names;
