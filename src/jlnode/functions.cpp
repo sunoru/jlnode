@@ -13,16 +13,19 @@ Napi::Value call_function(const Napi::CallbackInfo &info) {
     for (auto i = 0; i < argc; ++i) {
         args[i] = info[i];
     }
-    jl_value_t *jl_args[4] {
+    auto this_nv = info.This().operator napi_value();
+    auto result = (napi_value) nullptr;
+    jl_value_t *jl_args[5] {
         jl_box_voidpointer(info.Data()),
         jl_box_voidpointer(args),
         jl_box_uint64(argc),
-        jl_box_voidpointer(info.This().operator napi_value())
+        jl_box_voidpointer(this_nv),
+        jl_box_voidpointer(&result)
     };
-    auto result = jl_call(jlnode::call_function_func, jl_args, 4);
+    auto _result = jl_call(jlnode::call_function_func, jl_args, 5);
     delete[] args;
 
-    return result == nullptr ? env.Undefined() : Napi::Value(env, (napi_value) jl_unbox_voidpointer(result));
+    return result == nullptr ? env.Undefined() : Napi::Value(env, result);
 }
 
 napi_status create_function(napi_env _env, void *func, const char *utf8name, napi_value *result) {
