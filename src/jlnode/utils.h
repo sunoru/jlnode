@@ -3,26 +3,30 @@
 
 #include <node.h>
 #include <napi.h>
-#include "jlsyms.h"
+
+
+extern "C" {
+
+typedef struct {
+    void (*jl_yield)();
+    napi_value (*propertynames)(void *);
+    napi_value (*getproperty)(void *, void *);
+    napi_value (*setproperty)(void *, void *, void *);
+    napi_value (*hasproperty)(void *, void *);
+    void (*external_finalizer)(void *);
+    void (*object_finalizer)(void *, void *);
+    void (*arraybuffer_finalizer)(void *);
+    napi_value (*call_function)(void *, void *, size_t, void *);
+    void (*call_threadsafe)(void *);
+} jl_functions;
+
+}
 
 namespace jlnode {
 
-extern jl_module_t *nodecall_module;
-extern jl_function_t *propertynames_func;
-extern jl_function_t *getproperty_func;
-extern jl_function_t *setproperty_func;
-extern jl_function_t *hasproperty_func;
-extern jl_function_t *external_finalizer_func;
-extern jl_function_t *object_finalizer_func;
-extern jl_function_t *arraybuffer_finalizer_func;
-extern jl_function_t *call_function_func;
-extern jl_function_t *call_threadsafe_func;
+extern jl_functions util_functions;
 
-int initialize_utils(jl_module_t *module);
-
-jl_value_t *to_jl_value(napi_value node_value);
-
-napi_value to_napi_value(jl_value_t *jl_value);
+int initialize_utils(jl_functions functions);
 
 inline napi_value JsValueFromV8LocalValue(v8::Local<v8::Value> local) {
     return reinterpret_cast<napi_value>(*local);
@@ -32,16 +36,6 @@ inline v8::Local<v8::Value> V8LocalValueFromJsValue(napi_value v) {
     v8::Local<v8::Value> local;
     memcpy(static_cast<void *>(&local), &v, sizeof(v));
     return local;
-}
-
-inline void check_jl_exception(Napi::Env env, int gc_depth) {
-    auto err = jl_exception_occurred();
-    if (err != nullptr) {
-        for (auto i = 0; i < gc_depth; ++i) {
-            JL_GC_POP();
-        }
-        throw Napi::Error::New(env, jl_typeof_str(err));
-    }
 }
 
 }
@@ -58,15 +52,5 @@ inline void check_jl_exception(Napi::Env env, int gc_depth) {
         return napi_pending_exception;  \
     }                        \
 } while (0)
-
-#define GET_FUNC_POINTER(NAME, FUNC_NAME, FAILED_VALUE) \
-    do {                                                \
-        if ((NAME) == nullptr) {                        \
-            (NAME) = jl_get_function(jlnode::nodecall_module, FUNC_NAME);         \
-            if (jl_exception_occurred() || (NAME) == jl_nothing) { \
-                return FAILED_VALUE;                    \
-            }                                           \
-        }                                               \
-    } while(0)
 
 #endif //JLNODE_UTILS_H

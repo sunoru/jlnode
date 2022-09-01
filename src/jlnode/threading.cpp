@@ -20,13 +20,7 @@ int jlnode::initialize_threading(napi_env _env) {
 }
 
 void jlnode::CallJs(Napi::Env env, Napi::Function callback, Context *context, DataType *data) {
-    auto f_ptr = data;
-    GET_FUNC_POINTER(
-        call_threadsafe_func,
-        "jlnode_call_threadsafe",
-        (void)0
-    );
-    jl_call1(call_threadsafe_func, jl_box_voidpointer(f_ptr));
+    jlnode::util_functions.call_threadsafe(data);
 }
 
 void jlnode::dispose_threading() {

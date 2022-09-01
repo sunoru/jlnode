@@ -3,14 +3,13 @@
 #include "node_api.h"
 #include "instance.h"
 #include "objects.h"
-#include "jlsyms.h"
 
 jlnode::Instance *instance;
 static bool initialized = false;
 static uv_timer_t *jl_yield_timer;
 
 void _jl_yield(uv_timer_t *_) {
-    jl_yield();
+    jlnode::util_functions.jl_yield();
 }
 
 void _jl_yield_close(uv_handle_t *timer) {
@@ -29,11 +28,11 @@ int start_node(
     return instance->Initialize(addon_path, env, args, argc);
 }
 
-int initialize(uv_loop_t *loop, jl_module_t *module) {
+int initialize(uv_loop_t *loop, jl_functions utils) {
     jl_yield_timer = new uv_timer_t;
     uv_timer_init(loop, jl_yield_timer);
     uv_timer_start(jl_yield_timer, _jl_yield, 0, 1);
-    auto ret = jlnode::initialize_utils(module);
+    auto ret = jlnode::initialize_utils(utils);
     if (ret == 0) {
         initialized = true;
     }

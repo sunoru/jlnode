@@ -3,7 +3,6 @@
 
 #include <napi.h>
 
-#include "jlsyms.h"
 #include "utils.h"
 
 extern "C" {

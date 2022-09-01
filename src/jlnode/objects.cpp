@@ -5,20 +5,8 @@ Napi::Value object_getter(const Napi::CallbackInfo &info) {
     if (info.Length() != 1) {
         return env.Undefined();
     }
-    Napi::Value result;
-    auto object = jl_box_voidpointer(info.Data());
-    auto key = jl_box_voidpointer(info[0]);
-    GET_FUNC_POINTER(
-        jlnode::getproperty_func,
-        "jlnode_getproperty",
-        env.Undefined()
-    );
-    auto ret = jl_call2(jlnode::getproperty_func, object, key);
-    JL_GC_PUSH1(&ret);
-    jlnode::check_jl_exception(env, 1);
-    result = Napi::Value(env, (napi_value) jl_unbox_voidpointer(ret));
-    JL_GC_POP();
-    return result;
+    auto result = jlnode::util_functions.getproperty(info.Data(), info[0]);
+    return Napi::Value(env, result);
 }
 
 Napi::Value object_setter(const Napi::CallbackInfo &info) {
@@ -26,21 +14,8 @@ Napi::Value object_setter(const Napi::CallbackInfo &info) {
     if (info.Length() != 2) {
         return env.Undefined();
     }
-    Napi::Value result;
-    auto object = jl_box_voidpointer(info.Data());
-    auto key = jl_box_voidpointer(info[0]);
-    auto value = jl_box_voidpointer(info[1]);
-    GET_FUNC_POINTER(
-        jlnode::setproperty_func,
-        "jlnode_setproperty!",
-        env.Undefined()
-    );
-    auto ret = jl_call3(jlnode::setproperty_func, object, key, value);
-    JL_GC_PUSH1(&ret);
-    jlnode::check_jl_exception(env, 1);
-    result = Napi::Value(env, (napi_value) jl_unbox_voidpointer(ret));
-    JL_GC_POP();
-    return result;
+    auto result = jlnode::util_functions.setproperty(info.Data(), info[0], info[1]);
+    return Napi::Value(env, result);
 }
 
 Napi::Value object_haskey(const Napi::CallbackInfo &info) {
@@ -48,20 +23,8 @@ Napi::Value object_haskey(const Napi::CallbackInfo &info) {
     if (info.Length() != 1) {
         return Napi::Boolean::New(env, false);
     }
-    Napi::Value result;
-    auto object = jl_box_voidpointer(info.Data());
-    auto key = jl_box_voidpointer(info[0]);
-    GET_FUNC_POINTER(
-        jlnode::hasproperty_func,
-        "jlnode_hasproperty",
-        env.Undefined()
-    );
-    auto ret = jl_call2(jlnode::hasproperty_func, object, key);
-    JL_GC_PUSH1(&ret);
-    jlnode::check_jl_exception(env, 1);
-    result = Napi::Value(env, (napi_value) jl_unbox_voidpointer(ret));
-    JL_GC_POP();
-    return result;
+    auto result = jlnode::util_functions.hasproperty(info.Data(), info[0]);
+    return Napi::Value(env, result);
 }
 
 Napi::Value object_keys(const Napi::CallbackInfo &info) {
@@ -69,19 +32,8 @@ Napi::Value object_keys(const Napi::CallbackInfo &info) {
     if (info.Length() != 0) {
         return env.Undefined();
     }
-    Napi::Value result;
-    auto object = jl_box_voidpointer(info.Data());
-    GET_FUNC_POINTER(
-        jlnode::propertynames_func,
-        "jlnode_propertynames",
-        env.Undefined()
-    );
-    auto ret = jl_call1(jlnode::propertynames_func, object);
-    JL_GC_PUSH1(&ret);
-    jlnode::check_jl_exception(env, 1);
-    result = Napi::Value(env, (napi_value) jl_unbox_voidpointer(ret));
-    JL_GC_POP();
-    return result;
+    auto result = jlnode::util_functions.propertynames(info.Data());
+    return Napi::Value(env, result);
 }
 
 napi_status create_object_mutable(napi_env _env, void *v, napi_value *ret) {
@@ -104,13 +56,7 @@ napi_status create_object_mutable(napi_env _env, void *v, napi_value *ret) {
 
 
 void object_finalizer(Napi::Env env, void *data, void *func) {
-    GET_FUNC_POINTER(
-        jlnode::object_finalizer_func,
-        "object_finalizer",
-    );
-    auto data_ptr = jl_box_voidpointer(data);
-    auto f_ptr = jl_box_voidpointer(func);
-    jl_call2(jlnode::object_finalizer_func, f_ptr, data_ptr);
+    jlnode::util_functions.object_finalizer(func, data);
 }
 
 napi_status add_finalizer(napi_env _env, napi_value v, void *func, void *data) {

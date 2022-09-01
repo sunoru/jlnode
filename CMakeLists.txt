@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.1)
 
 project(jlnode
-    VERSION 16.1.0
+    VERSION 16.2.0
     LANGUAGES CXX)
 
 set(CMAKE_MACOSX_RPATH 1)
@@ -39,21 +39,6 @@ find_library(NODEJS_LIBRARY
 
 message(STATUS "NODEJS_LIBRARY: ${NODEJS_LIBRARY}")
 
-if(FIND_JULIA)
-set(JULIA_LIBRARY_NAMES
-    libjulia.so
-    libjulia.dylib
-    libjulia.dll
-    libjulia.lib)
-
-find_library(JULIA_LIBRARY
-    NAMES ${JULIA_LIBRARY_NAMES}
-    PATHS ENV LD_LIBRARY_PATH)
-else()
-endif()
-
-message(STATUS "JULIA_LIBRARY: ${JULIA_LIBRARY}")
-
 set(source_path "${CMAKE_CURRENT_SOURCE_DIR}/src/jlnode")
 
 set(sources
@@ -69,7 +54,6 @@ set(sources
 )
 set(headers
     ${source_path}/utils.h
-    ${source_path}/jlsyms.h
     ${source_path}/instance.h
     ${source_path}/externals.h
     ${source_path}/objects.h
@@ -85,8 +69,7 @@ add_library(${PROJECT_NAME}
 
 target_link_libraries(${PROJECT_NAME}
     ${CMAKE_JS_LIB}
-    ${NODEJS_LIBRARY}
-    ${JULIA_LIBRARY})
+    ${NODEJS_LIBRARY})
 
 target_include_directories(${PROJECT_NAME}
     PRIVATE
@@ -94,7 +77,7 @@ target_include_directories(${PROJECT_NAME}
     ${NAPI_INC})
 
 project(jlnode_addon
-    VERSION 16.1.0
+    VERSION 16.2.0
     LANGUAGES CXX)
 
 set(addon_path "${CMAKE_CURRENT_SOURCE_DIR}/src/addon")

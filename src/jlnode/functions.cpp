@@ -2,11 +2,6 @@
 
 Napi::Value call_function(const Napi::CallbackInfo &info) {
     auto env = info.Env();
-    GET_FUNC_POINTER(
-        jlnode::call_function_func,
-        "call_function",
-        env.Undefined()
-    );
 
     auto argc = info.Length();
     auto args = new napi_value[argc];
@@ -14,15 +9,12 @@ Napi::Value call_function(const Napi::CallbackInfo &info) {
         args[i] = info[i];
     }
     auto this_nv = info.This().operator napi_value();
-    auto result = (napi_value) nullptr;
-    jl_value_t *jl_args[5] {
-        jl_box_voidpointer(info.Data()),
-        jl_box_voidpointer(args),
-        jl_box_uint64(argc),
-        jl_box_voidpointer(this_nv),
-        jl_box_voidpointer(&result)
-    };
-    auto _result = jl_call(jlnode::call_function_func, jl_args, 5);
+    auto result = jlnode::util_functions.call_function(
+        info.Data(),
+        args,
+        argc,
+        this_nv
+    );
     delete[] args;
 
     return result == nullptr ? env.Undefined() : Napi::Value(env, result);
