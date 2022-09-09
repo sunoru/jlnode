@@ -8,6 +8,9 @@ on:
     branches:
       - main
 
+env:
+  NODE_VERSION: v16.17.0
+
 defaults:
   run:
     shell: bash
@@ -24,19 +27,25 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Checkout Julia
-        uses: julia-actions/setup-julia@v1
+      - name: Download libnode
+        uses: dawidd6/action-download-artifact@v2
         with:
-          version: '1.7'
-      - name: Prepare Julia dependencies
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          workflow: build.yml
+          name: libnode-${{ env.NODE_VERSION }}-${{ matrix.os }}-x64
+          path: ./libnode
+          repo: sunoru/libnode
+
+      - name: Prepare envrionment
         run: |
-          NODE_PATH=`julia -e 'using Pkg;Pkg.add("libnode_jll");using libnode_jll;println(libnode_jll.artifact_dir)'`
-          echo "$NODE_PATH/bin" >> $GITHUB_PATH
+          NODE_PATH=./libnode
+          if [ "$RUNNER_OS" == "Windows" ]; then
+            echo "$NODE_PATH/node-${{ env.NODE_VERSION }}" >> $GITHUB_PATH
+          else
+            echo "$NODE_PATH/bin" >> $GITHUB_PATH
+          fi
           echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$NODE_PATH/lib" >> $GITHUB_ENV
           echo "INSTALL_PREFIX=`pwd`/dist" >> $GITHUB_ENV
-
-      - name: Install Ninja
-        run: |
           if [ "$RUNNER_OS" == "Linux" ]; then
             sudo apt-get install ninja-build
           elif [ "$RUNNER_OS" == "Windows" ]; then
