@@ -38,7 +38,7 @@ jobs:
 
       - name: Prepare envrionment
         run: |
-          NODE_PATH=./libnode
+          NODE_PATH=`pwd`/libnode
           if [ "$RUNNER_OS" == "Windows" ]; then
             echo "$NODE_PATH/node-${{ env.NODE_VERSION }}" >> $GITHUB_PATH
           else

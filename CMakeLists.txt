@@ -28,14 +28,19 @@ string(REGEX MATCH "([0-9]+)$" NODEJS_MODULE_VERSION ${NODEJS_MODULE_VERSION_DEF
 
 set(NODEJS_LIBRARY_NAMES
     libnode.so.${NODEJS_MODULE_VERSION}
-    libnode.${NODEJS_MODULE_VERSION}.dylib
-    libnode.${NODEJS_MODULE_VERSION}.dll
-    node.lib)
+    libnode.${NODEJS_MODULE_VERSION}.dylib)
 
-find_library(NODEJS_LIBRARY
-    NAMES ${NODEJS_LIBRARY_NAMES}
-    PATHS ENV LD_LIBRARY_PATH
-    REQUIRED)
+if(WIN32)
+    find_file(NODEJS_LIBRARY
+        NAMES libnode.dll
+        PATHS ENV LD_LIBRARY_PATH
+        REQUIRED)
+else()
+    find_library(NODEJS_LIBRARY
+        NAMES ${NODEJS_LIBRARY_NAMES}
+        PATHS ENV LD_LIBRARY_PATH
+        REQUIRED)
+endif()
 
 message(STATUS "NODEJS_LIBRARY: ${NODEJS_LIBRARY}")
 
@@ -68,7 +73,6 @@ add_library(${PROJECT_NAME}
     ${CMAKE_JS_SRC})
 
 target_link_libraries(${PROJECT_NAME}
-    ${CMAKE_JS_LIB}
     ${NODEJS_LIBRARY})
 
 target_include_directories(${PROJECT_NAME}
@@ -99,7 +103,6 @@ target_include_directories(${PROJECT_NAME}
     ${NAPI_INC})
 
 target_link_libraries(${PROJECT_NAME}
-    ${CMAKE_JS_LIB}
     ${NODEJS_LIBRARY})
 
 install(TARGETS jlnode jlnode_addon
