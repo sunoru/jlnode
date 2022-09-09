@@ -8,6 +8,10 @@ on:
     branches:
       - main
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
   build:
     runs-on: ${{ matrix.os }}
@@ -30,6 +34,16 @@ jobs:
           echo "$NODE_PATH/bin" >> $GITHUB_PATH
           echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$NODE_PATH/lib" >> $GITHUB_ENV
           echo "INSTALL_PREFIX=`pwd`/dist" >> $GITHUB_ENV
+
+      - name: Install Ninja
+        run: |
+          if [ "$RUNNER_OS" == "Linux" ]; then
+            sudo apt-get install ninja-build
+          elif [ "$RUNNER_OS" == "Windows" ]; then
+            choco install ninja
+          else
+            brew install ninja
+          fi
 
       - name: Get npm cache directory
         id: npm-cache-dir
