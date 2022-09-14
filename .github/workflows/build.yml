@@ -42,6 +42,7 @@ jobs:
           if [ "$RUNNER_OS" == "Windows" ]; then
             NODE_PATH="$NODE_PATH/node-${{ env.NODE_VERSION }}-win-x64"
           fi
+          echo "NODE_PATH=$NODE_PATH" >> $GITHUB_ENV
           if [ "$RUNNER_OS" == "Windows" ]; then
             echo "$NODE_PATH" >> $GITHUB_PATH
             echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$NODE_PATH" >> $GITHUB_ENV
