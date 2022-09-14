@@ -27,24 +27,15 @@ string(REGEX MATCH "#define NODE_MODULE_VERSION ([0-9]+)" NODEJS_MODULE_VERSION_
 string(REGEX MATCH "([0-9]+)$" NODEJS_MODULE_VERSION ${NODEJS_MODULE_VERSION_DEF})
 
 set(NODEJS_LIBRARY_NAMES
-    libnode.so.${NODEJS_MODULE_VERSION})
+    node
+    libnode.so.${NODEJS_MODULE_VERSION}
+    libnode.${NODEJS_MODULE_VERSION}.dylib
+    libnode.dll)
 
-if(WIN32)
-    find_file(NODEJS_LIBRARY
-        NAMES libnode.dll
-        PATHS ENV LD_LIBRARY_PATH
-        REQUIRED)
-elseif(APPLE)
-    find_file(NODEJS_LIBRARY
-        NAMES libnode.${NODEJS_MODULE_VERSION}.dylib
-        PATHS ENV LD_LIBRARY_PATH
-        REQUIRED)
-else()
-    find_library(NODEJS_LIBRARY
-        NAMES ${NODEJS_LIBRARY_NAMES}
-        PATHS ENV LD_LIBRARY_PATH
-        REQUIRED)
-endif()
+find_library(NODEJS_LIBRARY
+    NAMES ${NODEJS_LIBRARY_NAMES}
+    PATHS ENV LD_LIBRARY_PATH
+    REQUIRED)
 
 message(STATUS "NODEJS_LIBRARY: ${NODEJS_LIBRARY}")
 
