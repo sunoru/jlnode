@@ -57,6 +57,7 @@ jobs:
           else
             brew install ninja
           fi
+          npm install node-addon-api@5.0.0
 
       - name: Build libjlnode & jlnode_addon.node
         run: |
