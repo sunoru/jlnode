@@ -61,7 +61,7 @@ jobs:
 
       - name: Build libjlnode & jlnode_addon.node
         run: |
-          cmake --build ./build --config Release -DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX} -G "Ninja"
+          cmake --build ./build --config Release -G "Ninja" -- -DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX}
           cmake --install ./build
 
       - uses: actions/upload-artifact@v2
