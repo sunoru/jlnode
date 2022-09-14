@@ -49,7 +49,6 @@ jobs:
             echo "$NODE_PATH/bin" >> $GITHUB_PATH
             echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$NODE_PATH/lib" >> $GITHUB_ENV
           fi
-          echo "CMAKE_JS_INC=$NODE_PATH/include/node" >> $GITHUB_ENV
           echo "INSTALL_PREFIX=`pwd`/dist" >> $GITHUB_ENV
           if [ "$RUNNER_OS" == "Linux" ]; then
             sudo apt-get install ninja-build
@@ -61,8 +60,13 @@ jobs:
 
       - name: Build libjlnode & jlnode_addon.node
         run: |
-          cmake --build ./build --config Release -G "Ninja" -- -DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX}
-          cmake --install ./build
+          mkdir -p build
+          cd build
+          cmake .. -G "Ninja" \
+            -DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX} \
+            -DCMAKE_JS_INC="$NODE_PATH/include/node"
+          cmake --build . --config Release
+          cmake --install .
 
       - uses: actions/upload-artifact@v2
         with:
