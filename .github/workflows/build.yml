@@ -40,12 +40,16 @@ jobs:
         run: |
           NODE_PATH=`pwd`/libnode
           if [ "$RUNNER_OS" == "Windows" ]; then
-            echo "$NODE_PATH/node-${{ env.NODE_VERSION }}" >> $GITHUB_PATH
-            echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$NODE_PATH/node-${{ env.NODE_VERSION }}" >> $GITHUB_ENV
+            NODE_PATH="$NODE_PATH/node-${{ env.NODE_VERSION }}-win-x64"
+          fi
+          if [ "$RUNNER_OS" == "Windows" ]; then
+            echo "$NODE_PATH" >> $GITHUB_PATH
+            echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$NODE_PATH" >> $GITHUB_ENV
           else
             echo "$NODE_PATH/bin" >> $GITHUB_PATH
             echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$NODE_PATH/lib" >> $GITHUB_ENV
           fi
+          echo "CMAKE_JS_INC=$NODE_PATH/include/node" >> $GITHUB_ENV
           echo "INSTALL_PREFIX=`pwd`/dist" >> $GITHUB_ENV
           if [ "$RUNNER_OS" == "Linux" ]; then
             sudo apt-get install ninja-build
@@ -55,23 +59,9 @@ jobs:
             brew install ninja
           fi
 
-      - name: Get npm cache directory
-        id: npm-cache-dir
-        run: |
-          echo "::set-output name=dir::$(npm config get cache)"
-      - uses: actions/cache@v2
-        id: npm-cache
-        with:
-          path: ${{ steps.npm-cache-dir.outputs.dir }}
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
-
-      - name: Install npm dependencies
-        run: npm ci
       - name: Build libjlnode & jlnode_addon.node
         run: |
-          npm run compile -- --CDCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX} -G "Ninja"
+          cmake --build ./build --config Release -DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX} -G "Ninja"
           cmake --install ./build
 
       - uses: actions/upload-artifact@v2
