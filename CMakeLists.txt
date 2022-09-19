@@ -51,7 +51,7 @@ set(sources
     ${source_path}/arrays.cpp
     ${source_path}/functions.cpp
     ${source_path}/promises.cpp
-    ${source_path}/threading.cpp}
+    ${source_path}/threading.cpp
 )
 set(headers
     ${source_path}/utils.h
