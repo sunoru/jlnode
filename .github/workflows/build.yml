@@ -51,7 +51,7 @@ jobs:
           npm ci
 
       - name: Build libjlnode & jlnode_addon.node
-        run:
+        run: |
           npm run build -- --CDCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX
           cmake --install build
 

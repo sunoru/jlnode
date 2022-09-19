@@ -28,12 +28,14 @@ string(REGEX MATCH "([0-9]+)$" NODEJS_MODULE_VERSION ${NODEJS_MODULE_VERSION_DEF
 
 if(WIN32)
     set(NODEJS_LIBRARY "")
+elseif(APPLE)
+    find_file(NODEJS_LIBRARY
+        NAMES libnode.${NODEJS_MODULE_VERSION}.dylib
+        PATHS ENV LD_LIBRARY_PATH
+        REQUIRED)
 else()
-    set(NODEJS_LIBRARY_NAMES
-        libnode.so.${NODEJS_MODULE_VERSION}
-        libnode.${NODEJS_MODULE_VERSION}.dylib)
     find_library(NODEJS_LIBRARY
-        NAMES ${NODEJS_LIBRARY_NAMES}
+        NAMES libnode.so.${NODEJS_MODULE_VERSION}
         PATHS ENV LD_LIBRARY_PATH
         REQUIRED)
 endif()
