@@ -6,7 +6,7 @@
 
 #ifdef _WIN32
 #    define LIBRARY_API __declspec(dllexport)
-#elif
+#else
 #    define LIBRARY_API
 #endif
 
