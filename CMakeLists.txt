@@ -26,16 +26,17 @@ file(READ ${CMAKE_JS_INC}/node_version.h NODEJS_VERSION_FILE)
 string(REGEX MATCH "#define NODE_MODULE_VERSION ([0-9]+)" NODEJS_MODULE_VERSION_DEF ${NODEJS_VERSION_FILE})
 string(REGEX MATCH "([0-9]+)$" NODEJS_MODULE_VERSION ${NODEJS_MODULE_VERSION_DEF})
 
-set(NODEJS_LIBRARY_NAMES
-    node
-    libnode.so.${NODEJS_MODULE_VERSION}
-    libnode.${NODEJS_MODULE_VERSION}.dylib
-    libnode.dll)
-
-find_library(NODEJS_LIBRARY
-    NAMES ${NODEJS_LIBRARY_NAMES}
-    PATHS ENV LD_LIBRARY_PATH
-    REQUIRED)
+if(WIN32)
+    set(NODEJS_LIBRARY "")
+else()
+    set(NODEJS_LIBRARY_NAMES
+        libnode.so.${NODEJS_MODULE_VERSION}
+        libnode.${NODEJS_MODULE_VERSION}.dylib)
+    find_library(NODEJS_LIBRARY
+        NAMES ${NODEJS_LIBRARY_NAMES}
+        PATHS ENV LD_LIBRARY_PATH
+        REQUIRED)
+endif()
 
 message(STATUS "NODEJS_LIBRARY: ${NODEJS_LIBRARY}")
 
@@ -50,7 +51,7 @@ set(sources
     ${source_path}/arrays.cpp
     ${source_path}/functions.cpp
     ${source_path}/promises.cpp
-    ${source_path}/threading.cpp
+    ${source_path}/threading.cpp}
 )
 set(headers
     ${source_path}/utils.h
@@ -68,6 +69,7 @@ add_library(${PROJECT_NAME}
     ${CMAKE_JS_SRC})
 
 target_link_libraries(${PROJECT_NAME}
+    ${CMAKE_JS_LIB}
     ${NODEJS_LIBRARY})
 
 target_include_directories(${PROJECT_NAME}
@@ -98,6 +100,7 @@ target_include_directories(${PROJECT_NAME}
     ${NAPI_INC})
 
 target_link_libraries(${PROJECT_NAME}
+    ${CMAKE_JS_LIB}
     ${NODEJS_LIBRARY})
 
 install(TARGETS jlnode jlnode_addon

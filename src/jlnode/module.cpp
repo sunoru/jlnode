@@ -1,6 +1,7 @@
 #include <string>
 
-#include "node_api.h"
+#include <node_api.h>
+
 #include "instance.h"
 #include "objects.h"
 
@@ -18,7 +19,12 @@ void _jl_yield_close(uv_handle_t *timer) {
 
 extern "C" {
 
-int start_node(
+LIBRARY_API int test() {
+    fprintf(stderr, "Test\n");
+    return 0;
+}
+
+LIBRARY_API int start_node(
     const char *addon_path,
     const char **args,
     size_t argc,
@@ -28,7 +34,7 @@ int start_node(
     return instance->Initialize(addon_path, env, args, argc);
 }
 
-int initialize(uv_loop_t *loop, jl_functions utils) {
+LIBRARY_API int initialize(uv_loop_t *loop, jl_functions utils) {
     jl_yield_timer = new uv_timer_t;
     uv_timer_init(loop, jl_yield_timer);
     uv_timer_start(jl_yield_timer, _jl_yield, 0, 1);
@@ -39,7 +45,7 @@ int initialize(uv_loop_t *loop, jl_functions utils) {
     return ret;
 }
 
-int dispose() {
+LIBRARY_API int dispose() {
     if (initialized) {
         initialized = false;
         uv_timer_stop(jl_yield_timer);
@@ -53,7 +59,7 @@ int dispose() {
     return ret;
 }
 
-int node_uv_run(uv_loop_t *loop, uv_run_mode mode) {
+LIBRARY_API int node_uv_run(uv_loop_t *loop, uv_run_mode mode) {
     auto ret = uv_run(loop, mode);
     if (ret == 0) {
         instance->platform->DrainTasks(instance->environment_config->setup->isolate());

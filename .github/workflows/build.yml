@@ -9,7 +9,7 @@ on:
       - main
 
 env:
-  NODE_VERSION: v16.17.0
+  NODE_VERSION: 16.17.0
 
 defaults:
   run:
@@ -25,50 +25,33 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ NODE_VERSION }}
 
       - name: Download libnode
         uses: dawidd6/action-download-artifact@v2
+        if: runner.os != 'Windows'
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           workflow: build.yml
-          name: libnode-${{ env.NODE_VERSION }}-${{ runner.os }}-x64
+          name: libnode-v${{ env.NODE_VERSION }}-${{ runner.os }}-x64
           path: ./libnode
           repo: sunoru/libnode
 
       - name: Prepare envrionment
         run: |
-          NODE_PATH=`pwd`/libnode
-          if [ "$RUNNER_OS" == "Windows" ]; then
-            NODE_PATH="$NODE_PATH/node-${{ env.NODE_VERSION }}-win-x64"
-          fi
-          echo "NODE_PATH=$NODE_PATH" >> $GITHUB_ENV
-          if [ "$RUNNER_OS" == "Windows" ]; then
-            echo "$NODE_PATH" >> $GITHUB_PATH
-            echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$NODE_PATH" >> $GITHUB_ENV
-          else
-            echo "$NODE_PATH/bin" >> $GITHUB_PATH
-            echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$NODE_PATH/lib" >> $GITHUB_ENV
+          if [ "$RUNNER_OS" != "Windows" ]; then
+            echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:`pwd`/libnode/lib" >> $GITHUB_ENV
           fi
           echo "INSTALL_PREFIX=`pwd`/dist" >> $GITHUB_ENV
-          if [ "$RUNNER_OS" == "Linux" ]; then
-            sudo apt-get install ninja-build
-          elif [ "$RUNNER_OS" == "Windows" ]; then
-            choco install ninja
-          else
-            brew install ninja
-          fi
-          npm install node-addon-api@5.0.0
+          npm ci
 
       - name: Build libjlnode & jlnode_addon.node
-        run: |
-          mkdir -p build
-          cd build
-          cmake .. -G "Ninja" \
-            -DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX} \
-            -DCMAKE_JS_INC="$NODE_PATH/include/node"
-          cmake --build . --config Release
-          cmake --install .
+        run:
 
       - uses: actions/upload-artifact@v2
         with:

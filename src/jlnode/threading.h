@@ -7,7 +7,7 @@
 
 extern "C" {
 
-napi_status threadsafe_call(
+LIBRARY_API napi_status threadsafe_call(
     napi_env env,
     void *func
 );
@@ -16,6 +16,7 @@ napi_status threadsafe_call(
 
 namespace jlnode {
 
+typedef decltype(nullptr) nullptr_t;
 
 using Context = nullptr_t;
 using DataType = void;
