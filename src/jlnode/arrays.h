@@ -6,7 +6,7 @@
 
 extern "C" {
 
-napi_status create_external_arraybuffer(napi_env env, void *data, size_t byte_length, napi_value *ret);
+LIBRARY_API napi_status create_external_arraybuffer(napi_env env, void *data, size_t byte_length, napi_value *ret);
 
 }
 

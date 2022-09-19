@@ -6,7 +6,7 @@
 
 extern "C" {
 
-napi_status create_external(napi_env env, void *data, napi_value *result);
+LIBRARY_API napi_status create_external(napi_env env, void *data, napi_value *result);
 
 }
 

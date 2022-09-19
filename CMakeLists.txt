@@ -5,6 +5,7 @@ project(jlnode
     LANGUAGES CXX)
 
 set(CMAKE_MACOSX_RPATH 1)
+set(CMAKE_CXX_STANDARD 14)
 if(NOT CMAKE_LIBRARY_OUTPUT_DIRECTORY)
     set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
 endif()
@@ -26,16 +27,17 @@ file(READ ${CMAKE_JS_INC}/node_version.h NODEJS_VERSION_FILE)
 string(REGEX MATCH "#define NODE_MODULE_VERSION ([0-9]+)" NODEJS_MODULE_VERSION_DEF ${NODEJS_VERSION_FILE})
 string(REGEX MATCH "([0-9]+)$" NODEJS_MODULE_VERSION ${NODEJS_MODULE_VERSION_DEF})
 
-set(NODEJS_LIBRARY_NAMES
-    libnode.so.${NODEJS_MODULE_VERSION}
-    libnode.${NODEJS_MODULE_VERSION}.dylib
-    libnode.${NODEJS_MODULE_VERSION}.dll
-    node.lib)
-
-find_library(NODEJS_LIBRARY
-    NAMES ${NODEJS_LIBRARY_NAMES}
-    PATHS ENV LD_LIBRARY_PATH
-    REQUIRED)
+if(WIN32)
+    set(NODEJS_LIBRARY "")
+elseif(NOT NODEJS_LIBRARY)
+    set(NODEJS_LIBRARY_NAMES
+        libnode.so.${NODEJS_MODULE_VERSION}
+        libnode.${NODEJS_MODULE_VERSION}.dylib)
+    find_library(NODEJS_LIBRARY
+        NAMES ${NODEJS_LIBRARY_NAMES}
+        PATHS ENV LD_LIBRARY_PATH
+        REQUIRED)
+endif()
 
 message(STATUS "NODEJS_LIBRARY: ${NODEJS_LIBRARY}")
 
@@ -99,8 +101,7 @@ target_include_directories(${PROJECT_NAME}
     ${NAPI_INC})
 
 target_link_libraries(${PROJECT_NAME}
-    ${CMAKE_JS_LIB}
-    ${NODEJS_LIBRARY})
+    ${CMAKE_JS_LIB})
 
 install(TARGETS jlnode jlnode_addon
     LIBRARY DESTINATION lib

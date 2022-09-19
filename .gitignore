@@ -3,6 +3,7 @@ build/
 cmake-build*/
 /cmake
 /installed
+/dist
 
 .idea/
 node_modules/
@@ -10,3 +11,5 @@ node_modules/
 /tmp/
 
 .vscode/
+
+/libnode/

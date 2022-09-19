@@ -8,6 +8,9 @@ on:
     branches:
       - main
 
+env:
+  NODE_VERSION: 16.17.0
+
 defaults:
   run:
     shell: bash
@@ -22,49 +25,39 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
-      - name: Checkout Julia
-        uses: julia-actions/setup-julia@v1
+      - name: Setup Node
+        uses: actions/setup-node@v3
         with:
-          version: '1.7'
-      - name: Prepare Julia dependencies
-        run: |
-          NODE_PATH=`julia -e 'using Pkg;Pkg.add("libnode_jll");using libnode_jll;println(libnode_jll.artifact_dir)'`
-          echo "$NODE_PATH/bin" >> $GITHUB_PATH
-          echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$NODE_PATH/lib" >> $GITHUB_ENV
-          echo "INSTALL_PREFIX=`pwd`/dist" >> $GITHUB_ENV
+          node-version: ${{ env.NODE_VERSION }}
 
-      - name: Install Ninja
+      - name: Download libnode
+        uses: dawidd6/action-download-artifact@v2
+        if: runner.os != 'Windows'
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          workflow: build.yml
+          name: libnode-v${{ env.NODE_VERSION }}-${{ runner.os }}-x64
+          path: ./libnode
+          repo: sunoru/libnode
+
+      - name: Prepare envrionment
         run: |
           if [ "$RUNNER_OS" == "Linux" ]; then
-            sudo apt-get install ninja-build
-          elif [ "$RUNNER_OS" == "Windows" ]; then
-            choco install ninja
-          else
-            brew install ninja
+            echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:`pwd`/libnode/lib" >> $GITHUB_ENV
+          elif [ "$RUNNER_OS" == "macOS" ]; then
+            echo "NODEJS_LIBRARY=`pwd`/`echo libnode/lib/libnode.*.dylib`" >> $GITHUB_ENV
           fi
+          echo "INSTALL_PREFIX=`pwd`/dist" >> $GITHUB_ENV
+          npm ci
 
-      - name: Get npm cache directory
-        id: npm-cache-dir
-        run: |
-          echo "::set-output name=dir::$(npm config get cache)"
-      - uses: actions/cache@v2
-        id: npm-cache
-        with:
-          path: ${{ steps.npm-cache-dir.outputs.dir }}
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
-
-      - name: Install npm dependencies
-        run: npm ci
       - name: Build libjlnode & jlnode_addon.node
         run: |
-          npm run compile -- --CDCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX} -G "Ninja"
-          cmake --install ./build
+          npm run build -- --CDCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX --CDNODEJS_LIBRARY=$NODEJS_LIBRARY
+          cmake --install build
 
       - uses: actions/upload-artifact@v2
         with:
-          name: ${{ matrix.os }}-dist
+          name: ${{ runner.os }}-dist
           path: ${{ env.INSTALL_PREFIX }}

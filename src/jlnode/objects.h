@@ -9,9 +9,9 @@
 
 extern "C" {
 
-napi_status create_object_mutable(napi_env env, void *v, napi_value *ret);
+LIBRARY_API napi_status create_object_mutable(napi_env env, void *v, napi_value *ret);
 
-napi_status add_finalizer(napi_env env, napi_value v, void *func, void *data);
+LIBRARY_API napi_status add_finalizer(napi_env env, napi_value v, void *func, void *data);
 
 }
 
