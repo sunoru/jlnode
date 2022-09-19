@@ -28,14 +28,12 @@ string(REGEX MATCH "([0-9]+)$" NODEJS_MODULE_VERSION ${NODEJS_MODULE_VERSION_DEF
 
 if(WIN32)
     set(NODEJS_LIBRARY "")
-elseif(APPLE)
-    find_file(NODEJS_LIBRARY
-        NAMES libnode.${NODEJS_MODULE_VERSION}.dylib
-        PATHS ENV LD_LIBRARY_PATH
-        REQUIRED)
-else()
+elseif(NOT NODEJS_LIBRARY)
+    set(NODEJS_LIBRARY_NAMES
+        libnode.so.${NODEJS_MODULE_VERSION}
+        libnode.${NODEJS_MODULE_VERSION}.dylib)
     find_library(NODEJS_LIBRARY
-        NAMES libnode.so.${NODEJS_MODULE_VERSION}
+        NAMES ${NODEJS_LIBRARY_NAMES}
         PATHS ENV LD_LIBRARY_PATH
         REQUIRED)
 endif()
@@ -102,8 +100,7 @@ target_include_directories(${PROJECT_NAME}
     ${NAPI_INC})
 
 target_link_libraries(${PROJECT_NAME}
-    ${CMAKE_JS_LIB}
-    ${NODEJS_LIBRARY})
+    ${CMAKE_JS_LIB})
 
 install(TARGETS jlnode jlnode_addon
     LIBRARY DESTINATION lib
