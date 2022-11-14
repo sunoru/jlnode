@@ -9,7 +9,7 @@ on:
       - main
 
 env:
-  NODE_VERSION: 16.17.0
+  NODE_VERSION: 18.12.1
 
 defaults:
   run:

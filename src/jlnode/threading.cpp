@@ -1,7 +1,6 @@
 #include "threading.h"
 
 napi_status threadsafe_call(napi_env _env, void *func) {
-    auto env = Napi::Env(_env);
     auto status = jlnode::threadsafe_jlcall.BlockingCall(func);
     return status;
 }

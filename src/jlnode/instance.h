@@ -51,7 +51,12 @@ public:
 
     Instance();
 
-    int Initialize(const char *addon_path, napi_env *env, const char **args, size_t argc);
+    int Initialize(
+        const char *addon_path,
+        napi_env *env,
+        const char **args,
+        size_t argc
+    );
 
     int Dispose() const;
 

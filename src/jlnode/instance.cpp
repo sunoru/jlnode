@@ -35,28 +35,31 @@ Instance::Instance() = default;
 int Instance::Initialize(const char *addon_path, napi_env *env, const char **_args, size_t argc) {
     char pt[256];
     uv_get_process_title(pt, 256);
-    std::vector<std::string> args{std::string(pt)};
-    std::vector<std::string> exec_args;
-    std::vector<std::string> errors;
+    auto args = std::vector<std::string>({pt});
     args.reserve(argc + 1);
     for (auto i = 0; i < argc; ++i) {
         args.emplace_back(_args[i]);
     }
-    auto exit_code = node::InitializeNodeWithArgs(&args, &exec_args, &errors);
-    for (const std::string &error : errors)
+    auto result = node::InitializeOncePerProcess(args, {
+        node::ProcessInitializationFlags::kNoInitializeV8,
+        node::ProcessInitializationFlags::kNoInitializeNodeV8Platform
+    });
+    for (const auto &error : result->errors())
         fprintf(stderr, "%s: %s\n", args[0].c_str(), error.c_str());
-    if (exit_code != 0) {
-        return exit_code;
+    if (result->early_return()) {
+        return result->exit_code();
     }
     auto thread_pool_size = std::getenv("UV_THREADPOOL_SIZE");
     platform = node::MultiIsolatePlatform::Create(thread_pool_size == nullptr ? 4 : atoi(thread_pool_size));
     V8::InitializePlatform(platform.get());
     V8::Initialize();
 
-    environment_config = new EnvironmentConfig(platform.get(), &errors, args, exec_args);
+    auto errors = std::vector<std::string>();
+
+    environment_config = new EnvironmentConfig(platform.get(), &errors, result->args(), result->exec_args());
     auto setup = environment_config->setup.get();
     if (!setup) {
-        for (const std::string &error : errors)
+        for (const auto &error : errors)
             fprintf(stderr, "%s: %s\n", args[0].c_str(), error.c_str());
         return 1;
     }
@@ -78,7 +81,7 @@ int Instance::Initialize(const char *addon_path, napi_env *env, const char **_ar
     if (!t->IsBigInt()) {
         char buffer[256];
         t->ToDetailString(context).ToLocalChecked()->WriteUtf8(isolate, buffer);
-        fprintf(stderr, "%s: %s should be an uint64_t\n", pt, buffer);
+        fprintf(stderr, "%s: %s should be an uint64_t\n", args[0].c_str(), buffer);
         return 1;
     }
     *env = (napi_env) t->ToBigInt(context).ToLocalChecked()->Uint64Value();
@@ -105,6 +108,7 @@ int Instance::Dispose() const {
     delete environment_config;
     V8::Dispose();
     V8::ShutdownPlatform();
+    node::TearDownOncePerProcess();
     return exit_code;
 }
 
