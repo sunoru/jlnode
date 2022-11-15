@@ -18,7 +18,7 @@
   },
   "homepage": "https://github.com/sunoru/jlnode#readme",
   "dependencies": {
-    "cmake-js": "^6.3.0",
+    "cmake-js": "^7.0.0",
     "node-addon-api": "^5.0.0"
   }
 }
