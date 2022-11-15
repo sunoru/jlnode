@@ -5,7 +5,7 @@ using v8::V8;
 
 std::string get_initialization_scripts(const char *addon_path) {
     auto path = std::string(addon_path);
-    auto i = 0;
+    size_t i = 0;
     while ((i = path.find('\\', i)) != std::string::npos) {
         path.replace(i, 1, "\\\\");
         i += 2;

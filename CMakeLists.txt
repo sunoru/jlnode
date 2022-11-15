@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.1)
 
 project(jlnode
-    VERSION 16.3.0
+    VERSION 18.0.0
     LANGUAGES CXX)
 
 set(CMAKE_MACOSX_RPATH 1)
@@ -82,7 +82,7 @@ target_include_directories(${PROJECT_NAME}
     ${NAPI_INC})
 
 project(jlnode_addon
-    VERSION 16.3.0
+    VERSION 18.0.0
     LANGUAGES CXX)
 
 set(addon_path "${CMAKE_CURRENT_SOURCE_DIR}/src/addon")
