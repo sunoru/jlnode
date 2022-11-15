@@ -20,6 +20,7 @@ if(NOT NAPI_INC)
         OUTPUT_VARIABLE NAPI_INC
     )
 endif()
+string(STRIP "${NAPI_INC}" NAPI_INC)
 message(STATUS "NAPI_INC: ${NAPI_INC}")
 
 file(READ ${CMAKE_JS_INC}/node_version.h NODEJS_VERSION_FILE)
@@ -68,6 +69,8 @@ set(headers
 add_library(${PROJECT_NAME}
     SHARED ${sources} ${headers}
     ${CMAKE_JS_SRC})
+
+set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "lib")
 
 target_link_libraries(${PROJECT_NAME}
     ${CMAKE_JS_LIB}

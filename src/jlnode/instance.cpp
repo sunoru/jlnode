@@ -4,9 +4,15 @@
 using v8::V8;
 
 std::string get_initialization_scripts(const char *addon_path) {
+    auto path = std::string(addon_path);
+    auto i = 0;
+    while ((i = path.find('\\', i)) != std::string::npos) {
+        path.replace(i, 1, "\\\\");
+        i += 2;
+    }
     return "globalThis.require = require('module').createRequire(process.cwd() + '/')\n"
            "globalThis.__jlnode_addon = globalThis.require('"
-           + std::string(addon_path) +
+           + path +
            "')\n"
            "return globalThis.__jlnode_addon.initialize()";
 }
